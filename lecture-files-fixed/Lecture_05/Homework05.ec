@@ -84,7 +84,6 @@ module M2(A:Adv2) = {
 lemma problem3 (A<:Adv2): 
   hoare [ M2(A).f : true ==> res=5 ].
 proof.
-hoare. 
 proc.
 swap 1.
 wp.
