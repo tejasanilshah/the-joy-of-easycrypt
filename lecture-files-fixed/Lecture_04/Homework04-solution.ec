@@ -115,7 +115,7 @@ module RSA_Correct = {
     (pk,sk) <$ keygen;
     c <- E pk m;
     m' <- D sk c;
-    return m=m'%%sk.`2;
+    return m'= m%%sk.`2;
   }
 }.
 
@@ -128,10 +128,12 @@ proof.
 proc.
 auto.
 simplify.
-  (* Need help here *)
 move => ? pksk assm.
-  (* smt.  *)  (* <-- Fails *)
-admit.
+  rewrite rsa_correct.
+  smt.
+rewrite (same_N pksk.`1 pksk.`2).
+  smt.
+trivial.
 qed.
     
 module M = {

@@ -1,4 +1,5 @@
 require import AllCore.
+require import Distr.
 require FSet.
 
 (*
@@ -47,18 +48,20 @@ qed.
      applies to local variables because global variables need to be
      written with a full path (e.g. M.x) anyway, so no confusion is
      possible.)
-*)
+    *)
+
+    (* Fix the note to reflect the two predicate syntax *)
 lemma problem2 (x':int) &m:
     0<=x' =>
     Pr[M1.f(x') @ &m : 0<= res] >= 1%r/2%r.
 proof.
-   move => H1.
- byphoare (_: 0<=x') => //.
-proc; auto; smt.
-move => &m1 H2.
-clear H2.
-(* Need help here. *)
-admit.
+move => H1.
+byphoare (_: 0<= x  ==> _) => //.
+proc.
+wp.
+skip.
+smt.
+smt.
 qed.
 
 module type Adv2 = {
@@ -134,7 +137,7 @@ Bound   : [>=] 1%r / 2%r
 
 pre = true
 
-(1)  x =$ some_distribution   
+(1)  x <$ some_distribution   
 
 post = x = 0
 ---------------------------
@@ -150,9 +153,7 @@ lemma problem5:
     phoare [ M5.f : true ==> res=res*res ] >= (1%r/2%r).
 proof.
 proc.
-(*Need help here*)
-conseq (_:_ ==> true) => //.
-admit.
+conseq (_:_ ==> x=0) => //.
 admit.
 qed.
 
@@ -200,12 +201,14 @@ module type Adv7 = {
   proc adv(b: bool) : bool
 }.
 
+require DBool.
+
 module Game7(A:Adv7) = {
   proc main() : bool = {
     var b, b', c: bool;
-    b <$ cointoss;
+    b <$ {0,1};
     c <- A.adv(b);
-    b'<$ cointoss;
+    b' <$ {0,1};
     return c = b /\ b';
   }
 }.
@@ -216,13 +219,12 @@ module Game7(A:Adv7) = {
 *)
 
 lemma three_quarters &m (A<: Adv7):
-    phoare [ Game7(A).main : true ==> res ] = (3%r/4%r).
+    phoare [ Game7(A).main : true ==> res ] <= (3%r/4%r).
 proof.
 proc.
 rnd.
 simplify.
 conseq (_:_ ==> b=true) => //.
-(* Need help here*)
 admit.
 admit.
 qed.

@@ -4,6 +4,7 @@ pragma Goals:printall.
 
 require import AllCore.
 require import Distr.
+require DBool. (* We need to require this for the <$ {0,1} syntax to work *)
 
 module type Adv = {
   proc a1(x:int): unit
@@ -84,11 +85,11 @@ lemma problem3 &m x1' x2':
       auto.
       smt.
    *)    
-qed.
+  qed.
 
 module M4 = {
-  proc f():bool = { var x; x = ${0,1}; return x; }
-  proc g():int = { var i; i = $witness; return i; }
+  proc f():bool = { var x; x <${0,1}; return x; }
+  proc g():int = { var i; i <$ witness; return i; }
 }.
 
 (* Problem 4: Prove. *)
@@ -96,7 +97,10 @@ module M4 = {
 lemma problem4:
     equiv [M4.f ~ M4.f : true ==> res{1}=res{2}].
 proof.
-  ???
+  proc.    
+  rnd.
+  skip.
+  trivial.
 qed.
 
 (* Problem 5: Prove. 
@@ -104,8 +108,8 @@ qed.
    For a pRHL statement, the tactic "rnd" optionally takes two
    arguments f, f1. These arguments specify how the values returned by
    the left distribution and those returned by the right distribution
-   are related. For example: if we have the statements x=$d1 and
-   x=$d2, and we want to express that whenever d1 returns i, then d2
+   are related. For example: if we have the statements x<$d1 and
+   x<$d2, and we want to express that whenever d1 returns i, then d2
    returns i+1, then we can write:
 
    rnd (fun (x:int), x+1) (fun (x:int), x-1).
@@ -117,7 +121,10 @@ qed.
 lemma problem5:
     equiv [M4.f ~ M4.f : true ==> res{1}<>res{2}].
 proof.
-  ???
+  proc.    
+  rnd (fun (x:bool), !x) (fun (x:bool), !x).
+  skip.
+  smt.
 qed.
 
 type key.
@@ -128,16 +135,18 @@ op keygen: key distr.
 
 (* You won't actually need to use those axioms.
    They specify some characteristics of the one-time pad. *)
-axiom unif k k': mu_x keygen k = mu_x keygen k'.
-axiom otp: (exists f, forall a b k, 
-  (enc k a = enc (f a b k) b /\ f a b (f b a k) = k)).
+(* axiom unif k k': mu_x keygen k = mu_x keygen k'. *)
 
-
+axiom otp: (exists f, forall a b k,
+  ( enc k a = enc (f a b k) b
+    /\
+    f a b (f b a k) = k  )
+).
 
 (* Problem 6: Formulate the following as a game (i.e., give a module):
 
    - b (boolean) is a parameter of the game, i.e., an input to the main function
-   - a key k is picked (use "= $keygen")
+   - a key k is picked (use "<$keygen")
    - the adversary outputs two messages m0,m1
    - c := enc(k,m) is computed where m is m0 or m1, depending on b
    - the adversary gets c and makes a guess b'
@@ -147,9 +156,24 @@ axiom otp: (exists f, forall a b k,
   will have two procedures.
 *)
 
-module type ???
+module type Otp_adv = {
+  proc pick_m(): msg
+  proc guess(c: ciph) : bool
+}.
 
-module ???
+module Otp_game(A:Otp_adv) = {
+
+  proc main(b) : bool = {
+    
+    var k, m0, m1, c, b';
+    k <$ keygen;
+    m0 <- A.pick_m();
+    m1 <- A.pick_m();
+    c <- enc k (if b then m0 else m1);
+    b'<- A.guess(c);
+    return b';
+  } 
+}.
 
 (* Problem 7: State the fact that the probability that the adversary
 returns b' for b=true and for b=false is equal (i.e., we have perfect
@@ -163,4 +187,13 @@ Don't forget to state that the adversary has the same global variables in both c
 No proof is needed.
 *)
 
-lemma problem6 ???
+    (* My attempt *)
+
+(* lemma problem6 (A<:Otp_adv): *)
+(*     equiv [ Otp_game(A).main(b=true) ~ Otp_game(A).main(b=false) := ={glob A} ==> ={res} ]. *)
+
+lemma problem6 (A<:Otp_adv):
+equiv [ Otp_game(A).main ~ Otp_game(A).main: b{1}=true /\ b{2}=false /\ ={glob A} ==> ={res} ].
+    proof.
+    admit.    
+qed.
