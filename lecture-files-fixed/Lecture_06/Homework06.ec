@@ -187,13 +187,14 @@ Don't forget to state that the adversary has the same global variables in both c
 No proof is needed.
 *)
 
-    (* My attempt *)
-
-(* lemma problem6 (A<:Otp_adv): *)
-(*     equiv [ Otp_game(A).main(b=true) ~ Otp_game(A).main(b=false) := ={glob A} ==> ={res} ]. *)
+(* My attempt *)
+(* lemma problem6 (A<:Otp_adv):
+    equiv [ Otp_game(A).main(b=true) ~ Otp_game(A).main(b=false) :
+    ={glob A} ==> ={res} ]. *)
 
 lemma problem6 (A<:Otp_adv):
-equiv [ Otp_game(A).main ~ Otp_game(A).main: b{1}=true /\ b{2}=false /\ ={glob A} ==> ={res} ].
+equiv [ Otp_game(A).main ~ Otp_game(A).main:
+      b{1}=true /\ b{2}=false /\ ={glob A} ==> ={res} ].
     proof.
     admit.    
 qed.

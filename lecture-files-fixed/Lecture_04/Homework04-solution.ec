@@ -8,7 +8,6 @@ Please indicate the time for each problem.
 *)
 
 require import AllCore.
-require FSet.
 require Distr.
 
 (* I am writing fully qualified names a lot, even when not necessary,
@@ -23,16 +22,6 @@ axiom cancel1: cancel f invf.
 axiom cancel2: cancel invf f.
 
 lemma invf_cancel x: invf (f x) = x. smt. qed.
-
-(* This is some advanced stuff, but basically it 
-  defines invf to be the inverse of f.
-  
-  More generally "choice x with y" where y is a lemma/axiom of the form
-  "exists a, etc" defines an operator x that has the property "etc"
-  (such an operator exists due to lemma y). 
-*)
-
-
 
 module OWP_Game = {
   proc adv(y) : D = {

@@ -1,6 +1,5 @@
 require import AllCore.
 require import Distr.
-require FSet.
 
 (*
 Due: Mar 22, 2015
