@@ -1,31 +1,88 @@
-(* TODO: In the textbook, include some screenshots with highlights *)
+(* 
+Welcome to Proof-General, the front-end the we use to work with EasyCrypt (EC).
+Proof-General itself is based on Emacs, so most of the standard Emacs keybindings
+work as well.
+All commands begin either with the CONTROL key, denoted by "C", 
+or the META or ALT key denoted by "M".
+So if you see "C-c C-n" it simply means: CONTROL + c and then CONTROL + n.
+Go ahead, try it. This will evaluate the current comment and
+place a black dot on the left margin at the beginning of the next one.
+*)
 
-(* TODO: Instructions on how to navigate  *)
+(*
+The black dot denotes the point until which EC has already evaluated the script.
+Most formal proofs are written interactively.
+The proof-assistant, EC in our case, will keep track of the goals
+(context, and conclusions) for us.
+The front-end, Proof-General + Emacs in our case, will show us the 
+goals and messages from the assistant, in the "goals" pane, and "response" pane 
+on the right.
+Our objective is to use different tactics to prove or "discharge" the goal.
+Since we only have comments so far there is no goal for EC to work with.
+We will change that in a short while.
+*)
+
+(*
+Here is a short list of keystrokes that will come in handy for this file:
+1. C-c C-n :  Evaluate next line or block of code 
+2. C-c C-u :  Go back one line or block of code
+3. C-s: Search for a string in the code
+4. C-c C-l: To reset the Proof-General layout
+5. C-x C-s: Save file
+6. C-x C-c: Exit Emacs (read the prompt at the bottom of the screen)
+*)
+
+(*
+EC has a typed expression language, so everything we declare
+should either explicitly have a type or it should be inferable
+from the operators that are used.
+To begin with let us import the built-in Integer theory file.
+*)
 
 require import Int.
 
+pragma Goals: printall.
+(* The pragma line simply tells EC to print all goals *)
+
 (*
-
-Let us start with simple mathematical properties of Integers
-and see how we can prove them in EasyCrypt
-
+Now, let us start with something trivial to prove.
+Let us start reflexivity of integers.
+Reflexivity is simply the property that an integer is equal to itslef.
+Mathematically, we would write it like so:
+For every integer x, x=x.
 *)
 
-lemma x_equal (x: int): x = x.
+(*
+Here is how we declare something like that in EC.
+C-c C-n multiple times to get EC to read the next line.
+Or alternatively, move the cursor to the line with the lemma, and hit C-c C-ENTER.
+*)
+
+lemma int_refl (x: int): x = x.
+(*
+Notice how EC populates the goals pane on the right
+with the context and the conclusion.
+*)
 proof.
     trivial.
 qed.
-    (* Need help *)
-    (* The manual doesn't have information about what trivial does. *)
+
+(* Need help *)
+(* The manual doesn't have information about what trivial does. *)
+
+(* TODO: Write about what tactics are *)
+
+(* TODO: Write about simplify *)
 
 lemma x_plus_equal (x: int): x + 3 = x + 1 + 1 + 1.
 proof.
     simplify.
     (* Need help *)
-    (* true? Explain what this is *)
+    (* How do I explain true? *)
     trivial.
 qed.
 
+(* TODO: Write about admit *)
 (* ---- Exercise ---- *)
 
 lemma x_minus_equal (x: int): x - 10 = x - 9 - 1.
@@ -57,7 +114,7 @@ qed.
 
 (* TODO: Searching *)
 
-(* TODO:  ---- Exercise ---- *)
+(* TODO:  ---- Exercises ---- *)
 
 (* Distributivity *)
 
@@ -102,8 +159,6 @@ qed.
 (* TODO: Introduce smt. Do all the previous exercises with smt *)
 
 require import AllCore.
-
-pragma Goals: printall.
 
 (* Logs and exponents *)
 
