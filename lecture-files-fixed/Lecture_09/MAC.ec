@@ -3,7 +3,7 @@ pragma Goals:printall.
 require import AllCore.
 require import Distr.
 require import List.
-(* require import Finite. *)
+require import FinType.
 
 type K.
 type M. (* messages *)
@@ -19,12 +19,19 @@ clone Distr.MFinite as MBS with
 clone Distr.MFinite as CTS with
   type t <= C.
 
-(* axiom Mblockfin: Finite.finite univ<:Mblock>. *)
-(* axiom Cfin: Finite.finite univ<:C>. *)
-(* axiom Kfin: Finite.finite univ<:K>. *)
+clone Distr.MFinite as MBlockToC with
+type t <= Mblock -> C.
 
-(* Need help here *)
-(* op unif = FSet.Duni.duni (ISet.Finite.toFSet ISet.univ<:'a>). *)
+(* 
+Here we are axiomatizing the finiteness of multiple things.
+First we axiomatize the finiteness of different data-types.
+Next, we are axiomatizing the finiteness of the functions that map Mblock -> C.
+This is still "cheating". If we didn't want to cheat, we would need to
+prove multiple things.
+We looked at how we could do this in Lecture 4, however we are trying to learn
+how to work with cryptographic protocols so we will proceed with the
+axiomatic approach.
+*)
 
 (* Definition of PRFs *)
 
@@ -78,7 +85,7 @@ module Game2(A : AdvPRF) = {
   proc main(q0:int) : bool = {
     var b;
     (* Need help here *)
-    (* PRFOracle.f <$ ; *)
+    PRFOracle.f <$ MBlockToC.dunifin ;
     PRFOracle.q <- q0;
     PRFOracle.num_q <- 0;
     
@@ -152,6 +159,11 @@ module type AdvEFCMA (O:MacOracleT) = {
   proc guess () : Mblock*C
 }.
 
+print (\in).
+
+print mem.
+
+
 module EF_CMA_Game (A : AdvEFCMA) = {
   module A = A(MacOracle)
   
@@ -164,7 +176,7 @@ module EF_CMA_Game (A : AdvEFCMA) = {
     (m',t') <- A.guess ();
 
       (* Need help here *)
-    return (! mem m' MacOracle.msgLog) /\ (mac MacOracle.k m' = t');
+    return (! m' \in MacOracle.msgLog) /\ (mac MacOracle.k m' = t');
   }
 }.
 

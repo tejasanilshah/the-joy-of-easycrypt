@@ -6,14 +6,34 @@ type D.
 clone Distr.MFinite as DD with
   type t <= D.
 
-(* Implicitly axiomatized finiteness:
+(*
+Implicitly axiomatized finiteness:
 If we wanted not to axiomatize it,
 we would add "proof *" before the . in the clone command
-Like so:
 
-clone Distr.MFinite as DD with
-  type t <= D
-  proof *. *)
+To make this idea clear let us define another type called throwaway,
+and see what we would need to prove if we didn't axiomatize the finiteness.
+*)
+
+type throwaway.
+clone Distr.MFinite as Finthrowaway with
+    type t <= throwaway
+    proof *.
+
+(* EC requires us to prove Support.enum_spec, which we can
+do by using "realize". However, since throwaway is an abstract type,
+we can't really do so.
+Similarly, in our exercise we have the type D, which is an abstract type.
+At this point this isn't the focus of the lecture so we will 
+go continue with the axiomatized approach. But it is important to know
+that this is "cheating".
+ *)
+realize Support.enum_spec.
+admit.
+qed.
+
+(* Let us throwaway the throwaway type, and continue with the lecture. *)
+
 
 op f : D -> D.
 axiom f_bij: bijective f.

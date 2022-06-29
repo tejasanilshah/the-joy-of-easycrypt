@@ -47,7 +47,7 @@ pragma Goals: printall.
 (*
 Now, let us start with something trivial to prove.
 Let us start reflexivity of integers.
-Reflexivity is simply the property that an integer is equal to itslef.
+Reflexivity is simply the property that an integer is equal to itself.
 Mathematically, we would write it like so:
 For every integer x, x=x.
 *)
@@ -80,8 +80,7 @@ Once there are no more goals, we can end the proof with "qed",
 and EC saves the lemma for further use.
 *)
 
-(* Need help *)
-(* The manual doesn't have information about what trivial does. *)
+(*TODO: Elaborate about trivial. Basically try and see if it helps. *)
 
 print int_refl.
 
@@ -124,7 +123,7 @@ We will get to more meaningful examples in a bit, going through these
 simple examples will make writing more complex proofs easier.
 *)
 
-lemma x_plus_equal (x: int): x + 3 = x + 1 + 1 + 1.
+lemma x_plus_equal (x: int): x + 3 = 1 + 1 + 1 + x.
 proof.
     simplify.
     (* EC does the mathematical computation for us and reduces the goal to true *)
@@ -135,6 +134,7 @@ proof.
     (* simplify doesn't fail, and leaves the goal unchanged *)
 
     trivial.
+smt.
 qed.
 
 (* ---- Exercise ---- *)
@@ -267,8 +267,6 @@ lemma exp_product2 (x: real) (a b: int): x <> 0%r => x^a * x^b = x^(a + b).
 proof.
     move => x_pos.
     search (^) (=).
-    (* Need help here *)
-    (* It holds even for x=0 so why is there a pre-condition for x <> 0 in this *)
     print  RField.exprD.
     rewrite -RField.exprD.
     assumption.
@@ -293,8 +291,9 @@ qed.
 lemma log_product (a b x : real): 0%r < a  => 0%r < b => log x (a*b) = log x a + log x b.
 proof.
     move => H1 H2.
-    (* TODO: Need help here *)
-    (* Unfold log? inline log? *)
+print log.
+rewrite /log.
+  (* Write about rewrite *)
     smt.
 qed.
 
@@ -305,8 +304,12 @@ require import IntDiv.
 (* How to search for strings in the theories *)
 (* Trying to search for "mod" *)
 
+
 (* This doesn't work for some reason.*)
-search (%%).
+search (_ %% _).
+search (+).
+print IntDiv.
+print (%%).
 
 print modzDm.
 
