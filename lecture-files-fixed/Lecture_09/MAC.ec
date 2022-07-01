@@ -3,7 +3,7 @@ pragma Goals:printall.
 require import AllCore.
 require import Distr.
 require import List.
-require import FinType.
+
 
 type K.
 type M. (* messages *)
@@ -84,7 +84,6 @@ module Game2(A : AdvPRF) = {
 
   proc main(q0:int) : bool = {
     var b;
-    (* Need help here *)
     PRFOracle.f <$ MBlockToC.dunifin ;
     PRFOracle.q <- q0;
     PRFOracle.num_q <- 0;
@@ -159,11 +158,6 @@ module type AdvEFCMA (O:MacOracleT) = {
   proc guess () : Mblock*C
 }.
 
-print (\in).
-
-print mem.
-
-
 module EF_CMA_Game (A : AdvEFCMA) = {
   module A = A(MacOracle)
   
@@ -174,13 +168,13 @@ module EF_CMA_Game (A : AdvEFCMA) = {
     MacOracle.msgLog <- [];
     
     (m',t') <- A.guess ();
-
-      (* Need help here *)
     return (! m' \in MacOracle.msgLog) /\ (mac MacOracle.k m' = t');
   }
 }.
 
 (*
+Comments from old lecture.
+
 (* Bad axiom: A may access the global variables of MacOracle!
    (In particular, access the key, or clear msgLog) *)
 axiom onetime_EFCMA (A<:AdvEFCMA) q &m:
