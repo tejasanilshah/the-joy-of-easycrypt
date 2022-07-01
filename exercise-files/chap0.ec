@@ -80,17 +80,35 @@ Once there are no more goals, we can end the proof with "qed",
 and EC saves the lemma for further use.
 *)
 
-(*TODO: Elaborate about trivial. Basically try and see if it helps. *)
+(*
+"trivial" tries to solve the goal using a mixture of other tactics.
+So it can be hard to understand when to apply it, but the good news
+is that trivial never fails. It either solves the goals or leaves the goal
+unchanged. So you can always try it without harm.
+*)
 
 print int_refl.
 
 (*
 The "print" command prints out the request in the response pane.
-We can print types, modules, operations, etc using the print keyword.
+We can print types, modules, operations, lemmas etc using the print keyword.
+Here are some examples:
 *)
 
+print op (+).
+print op min.
+print axiom Int.fold0.
+
+(* 
+The keywords simply act as qualifiers and filters. 
+You can print even without those. 
+Like so:
+*)
+print (+).
+print min.
+
 (*
-Now EC, knows the lemma int_refl, and can use it to prove other lemmas.
+Now EC, knows the lemma int_refl, and allows us to use it to prove other lemmas.
 Although the next lemma is trivial, it illustrates the idea of this applying 
 known results.
 *)
@@ -101,7 +119,7 @@ proof.
 qed.
 
 (*
-Apply tries to match the conclusion of what we are applying (the proof term), 
+"apply" tries to match the conclusion of what we are applying (the proof term), 
 with the goal's conclusion. If there is a match, it replaces the goal
 with the subgoals of the proof term.
 In our case, EC matches int_refl to the goal's conclusion, sees that it
@@ -109,32 +127,40 @@ matches, and replaces the goal with what needs to be proven for int_relf which i
 nothing, and it concludes the proof.
 *)
 
+(* 
+EC comes with a lot of predefined lemmas and axioms that we can use.
+Axioms don't need any proofs while lemmas require proofs, like we'd expect.
+Let us now look at axioms about commutativity and associativity for integers.
+They are by the names addzC, and addzA. Print them out as an exercise.
+*)
+
+
+(* Simplifying goals *)
+
 (*
 In the proofs, sometimes tactics yield us something that can be simplified
 We use the tactic "simplify", in order to carry out the simplification.
 
 The simplify tactic reduces the goal to a normal form using lambda calculus.
-We don't need to worry about the specifics of how, but we it is important to
+We don't need to worry about the specifics of how, but it is important to
 understand that EC can simplify the goals given it knows how to.
 It will leave the goal unchanged if the goal is already in the normal form.
 
-For instance, here is another contrived example that illustrates the idea.
-We will get to more meaningful examples in a bit, going through these
-simple examples will make writing more complex proofs easier.
+For instance, here is a contrived example that illustrates the idea.
+We will get to more meaningful examples later, but going through these
+simple examples will make writing complex proofs easier.
 *)
 
-lemma x_plus_equal (x: int): x + 3 = 1 + 1 + 1 + x.
+(* Commutativity *)
+lemma x_plus_comm (x: int): x + 2*3 = 6 + x.
 proof.
     simplify.
-    (* EC does the mathematical computation for us and reduces the goal to true *)
-    (* Need help *)
-    (* How do I explain true? *)
-
+    (* EC does the mathematical computation for us and simplifies the goal *)
     simplify.
     (* simplify doesn't fail, and leaves the goal unchanged *)
-
     trivial.
-smt.
+    (* trivial doesn't fail either, and leaves the goal unchanged *)
+    apply addzC.
 qed.
 
 (* ---- Exercise ---- *)
@@ -142,7 +168,6 @@ qed.
 "admit" is a tactic that closes the current goal by admitting it.
 Replace admit in the following lemma and prove it using the earlier tactics.
 *)
-
 lemma x_minus_equal (x: int): x - 10 = x - 9 - 1.
 proof.
 admit.
@@ -154,28 +179,20 @@ in the same order as EC lists it. "admit" can be used to bypass a certain
 goal and focus on something else in the goal list.
 *)
 
-(* 
-EC comes with a lot of predefined lemmas and axioms that we can already use.
-For instance, let us take a look at the "addzC" and "addzA" axioms.
-Try to use these to prove commutativity and associativity for integers.
+(*
+Use the tactic "split" to split the disjunction into two
+and apply the previous axioms to discharge the goals.
+Experiment with admiting the first goal after splitting
 *)
-print addzC.
-
-(* Commutativity *)
-
-lemma int_comm (x y: int): x + y = y + x.
+lemma int_assoc_comm (x y z: int): x + (y + z) = (x + y) + z /\ x + y = y + x.
 proof.
-    admit.
+admit.
 qed.
 
-
-(* Associativity *)
-print addzA.
-
-lemma int_assoc (x y z: int): x + (y + z) = (x + y) + z.
-proof.
-    admit.
-qed.
+(*
+To deal with disjunctions in EC, you can use the tactics "left" or "right"
+to step into a proof of the left proof term, or the right proof term respectively.
+*)
 
 (* Searching in EC *)
 
@@ -190,15 +207,21 @@ search [-].
 (* [] - Square braces for unary operators  *)
 
 search (+).
+
+(*
+As you can see the list can be quite overwhelming and difficult to navigate.
+So we can limit the results using a list of operators, or patterns.
+*)
+
 search ( * ).
-(* () - Curly braces for binary operators. 
+(*
+() - Curly braces for binary operators. 
 Notice the extra space for the "*" operator.
 We need that since (* *) also indicates comments.
 *)
 
-search (-) (+).
-(* Lists of operators *)
-
+search (+) ( = ) (=>).
+(* List of operators "=>" is the implication symbol *)
 
 (*---- Exercises ----*)
 
@@ -241,21 +264,61 @@ proof.
         trivial.
 qed.
 
+(*
+"rewrite" simply rewrites the pattern provided, it can be interchanged with apply.
+*)
 
 (* Let us see some variations *)
 
 lemma int_assoc_rev (x y z: int): x + y + z = x + (y + z).
 proof.
+    print addzA.
+    (* 
+    We might have the a lemma or an axiom that we can apply to the goal,
+    but the LHS and RHS might be flipped, and EC will complain that they
+    they don't match to apply them.
+    To apply a lemma or axiom in reverse, we simply add the "-" infront
+    of the lemma to switch the sides like so.
+    *)
     rewrite -addzA.
-    simplify.
     trivial.
 qed.
 
-(* TODO: Introduce smt. Do all the previous exercises with smt *)
+(* 
+Recap:
+So far we have seen the following tactics:
+trivial, simplify, apply, rewrite, split, left, right, admit, assumption, 
+We also saw how to print and search for patterns.
+These are at the foundation of how we work with EC.
+
+Intro to smt:
+An important point to understand, however, is that EC was built to work with cryptographic
+properties and more complex things. So although other mathematical theorems and claims 
+can be proven in EC, it will be quite painful to do so. We will employ powerful automated tools
+to take care of some of these low level tactics and logic.
+EC offers this in the form of the "smt" tactic.
+When we run smt, EC sends the conclusion and the context to external smt solvers.
+If they are able to sovle the goal, then EC completes the proof.
+If not smt fails and the burden of the proof is still on us.
+*)
+
+lemma x_pos_smt (x: int): 0 < x => 0 < x+1.
+proof.
+smt.
+qed.
+
+(*
+As you can see, smt can make our lives much easier.
+Now, here are some properties about logarithms that are mentioned in
+The Joy of Cryptography. We leave them to be completed as exercises, without using the smt tactic.
+Most of them are straightforward and serve the purpose of exercising the use of basic tactics.
+*)
 
 require import AllCore.
 
-(* Logs and exponents *)
+(* print AllCore to see what it includes *)
+
+(* Logs and exponents: *)
 
 lemma exp_product (x: real) (a b: int): x^(a*b) = x ^ a ^ b.
 proof.
@@ -274,50 +337,61 @@ proof.
 qed.
 
 (* Logarithm exercises *)
-(* TODO: Exercise to get students to op log *)
-
+print Real.
 require import RealExp.
+print RealExp.
 
-lemma ln_product (a b: real) : 0%r < a  => 0%r < b => ln (a*b) = ln a + ln b.
+print ln.
+search ln.
+lemma ln_product (x y: real) : 0%r < x  => 0%r < y => ln (x*y) = ln x + ln y.
 proof.
     search (ln) (+).
     move => H1 H2.
     by apply lnM.
 qed.
-    
 
-(* As an exercise try to do it for log *)
-(* Intro to functions in EC  *)
-lemma log_product (a b x : real): 0%r < a  => 0%r < b => log x (a*b) = log x a + log x b.
+
+print log.
+(*
+Notice how log is defined. It is defined as an operator that expects two inputs
+Since most of ECs axioms are written for natural logs (ln), inorder to reason with
+log and inorder to work with the next lemma, you will need to rewrite log.
+To do so the syntax is
+
+rewrite /log.
+
+The "/" will rewrite the pattern that follows.
+*)
+
+(*
+This helper can come in handy in the next proof.
+Sometimes it can be cumbersome to reason with a goal.
+In cases like those, it is useful to reduce the complexity of the proof by using
+helper lemmas like these.
+*)
+
+lemma helper (x y z: real): (x + y) / z = x/z + y/z.
+proof.
+smt.
+qed.
+
+lemma log_product (x y a : real): 0%r < x  => 0%r < y => log a (x*y) = log a x + log a y.
 proof.
     move => H1 H2.
-print log.
-rewrite /log.
-  (* Write about rewrite *)
-    smt.
+    rewrite /log.
+    rewrite lnM.
+    assumption.
+    assumption.
+    by apply helper.
 qed.
 
 (* Modulo arithmatic exercises *)
 require import IntDiv.
 
-(* Need help here *)
-(* How to search for strings in the theories *)
-(* Trying to search for "mod" *)
-
-
-(* This doesn't work for some reason.*)
-search (_ %% _).
-search (+).
-print IntDiv.
-print (%%).
-
-print modzDm.
-
 lemma mod_add (x y z: int): (x %% z + y %% z) %% z = (x + y) %% z.
 proof.
     by apply modzDm.
 qed.
-
 
 (* 
 A couple of more keystrokes that might be useful.
