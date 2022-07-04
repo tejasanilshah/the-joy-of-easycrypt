@@ -135,7 +135,7 @@ op keygen: key distr.
 
 (* You won't actually need to use those axioms.
    They specify some characteristics of the one-time pad. *)
-(* axiom unif k k': mu_x keygen k = mu_x keygen k'. *)
+axiom unif k k': mu keygen k = mu keygen k'.
 
 axiom otp: (exists f, forall a b k,
   ( enc k a = enc (f a b k) b
