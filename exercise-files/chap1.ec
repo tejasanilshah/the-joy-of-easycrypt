@@ -36,8 +36,6 @@ This is because, Evil_adv is a type that we will need to instantiate.
 
 *)
 
-(* TODO: Expand on why it is module type and not just a module *)
-
 module type Evil_adv = {
   proc eavesdrop () : bool
 }.
@@ -85,7 +83,7 @@ To introduce memory into the context we need to prepend "&" to a variable name.
 Like so:
 *)
 
-move => &m x.
+move => &m H1.
 subst.
 (* The "subst" tactic simply substitutes variables *)
 trivial.
@@ -107,13 +105,13 @@ postcondition with the weakest precondition R such that the
 statement judgement consisting of R, the consumed suffix(es) and
 the conclusion’s original postcondition holds.
 
-                   x = 1  => x+2=3
-          -------------------------------skip
-                 {x = 1}     {x+2=3}
-          -------------------------------wp
                 {x = 1} x:= x+2 {x=3}
+          -------------------------------wp
+                 {x = 1}     {x+2=3}
+          -------------------------------skip
+                   x = 1  => x+2=3
 
-  (* TODO: Show it formally once (Need help) *)
+  (* TODO: Show it formally once (help) *)
 *)
 wp.
 skip.
@@ -157,12 +155,17 @@ proof.
 proc.
 wp.
 skip.
-move => &m t x.
+move => &m T x.
 by simplify.
 (* Prepending the "by" keyword to a tactic
 tries to close the goals by applying trivial
 to the result of the tactic, and fails if the goal can't be closed *)
 qed.
+
+(*
+"by" is called a tactical. Tacticals are commands that can work with
+other tactics. We will see more later.
+*)
 
 (*
 So far so good, that was pretty much what we expected.
@@ -177,6 +180,7 @@ proc.
 wp.
 skip.
 move => _ f.
+
 (*
 The underscore essentially is a pattern for introduction 
 which tells EC to ignore whatever is in that position.
@@ -202,7 +206,18 @@ the "move" tactic. So our math is still consistent and the world hasn't exploded
 The way to think about this triple is assuming "false" holds implies that 15 = 0.
 *)
 
-module Func3 = {
+
+module Flip_Exp = {
+
+proc flipper (x: bool) : bool =
+{
+  var r: bool;
+  if (x = true) 
+  { r <- false; }
+  else
+  { r <- true; }
+  return r;
+}
 
 proc exp (x a: int) : int = 
 {
@@ -215,19 +230,57 @@ proc exp (x a: int) : int =
   return r;
 }
 
+
 }.
 
-lemma exp_correct: hoare [ Func3.exp : x = 10 /\ a = 2 ==> res = 100 ].
+lemma flipper_correct: hoare [ Flip_Exp.flipper : x = true ==> res = false ].
+proof.
+proc.
+(*
+When the first statement of the program is an if condition, we can use the
+"if" tactic to branch into two different goals with appropriate truth values for
+the if condition.
+In our case, the goal branches into x = true, and x <> true based, and these
+conditions are added to the preconditions.
+*)
+if.
+
+  (*Goal 1:  x = true *)
+  wp.
+  auto.
+ 
+  (* If the current goal is a HL, pHL, pRHL statement the "auto" tactic
+    uses various program logic tactics in an attempt to reduce the goal
+    to a simpler one. Never fails, but may fail to make any progress. *)
+
+  (* Goal 2: x <> true.
+  Yields a contradiction in the assumptions.
+  we can use some automation to deal with it.
+  *)
+  wp.
+  auto.
+  smt.
+qed.
+
+(*
+Notice the repetition of proof steps in the branches.
+This can be reduced by using tacticals.
+In order to tell EC to repeated use certain tactics on
+resulting goals, we use the ":" tactical.
+So, we can simplify the above proof like so:
+*)
+
+lemma flipper_correct': hoare [ Flip_Exp.flipper : x = false ==> res = true ].
+proof.
+proc.
+if; wp; auto; smt.
+qed.
+
+lemma exp_correct: hoare [ Flip_Exp.exp : x = 10 /\ a = 2 ==> res = 100 ].
 proof.
 proc.
 simplify.
-(* TODO: HELP! *)
-while ( r = r * x  ).
-wp.
-skip.
-auto.
-smt.
-wp.
-skip.
-admit.
+(* TODO HELP! *)
+while ().
+
 qed.
