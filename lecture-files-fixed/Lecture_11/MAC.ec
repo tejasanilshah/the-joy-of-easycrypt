@@ -4,7 +4,8 @@ require import AllCore.
 require import Distr.
 require import List.
 require ROM.
-
+require import FSet.
+require import SmtMap.
 
 type K.
 type M. (* messages *)
@@ -80,14 +81,13 @@ module PRF_Game1(A : AdvPRF) = {
   }
 }.
 
-(* TODO: Help with this  *)
-(* What is ROM  *)
-clone ROM.Lazy as MyROM with
-  type from <- Mblock,
-  type to <- C,
-  op dsample <- fun (x:Mblock), unif<:C>.
+clone ROM as MyROM with
+  type in_t <- Mblock,
+  type out_t <- C,
+  op dout <- fun (x:Mblock), CTS.dunifin
+proof *.
 
-module RO = MyROM.RO.
+module RO = MyROM.Lazy.LRO.
 
 module PRFOracleRO:PRFOracleT = {
   var max_q:int
@@ -95,11 +95,11 @@ module PRFOracleRO:PRFOracleT = {
 
   proc queryPRF(m): C = {
     var r;
-    if (num_q >= max_q) {
-      r = witness;
+    if (max_q <= num_q) {
+      r <- witness;
     } else {
-      num_q = num_q + 1;
-      r = RO.o(m);
+      num_q <- num_q + 1;
+      r <- RO.o(m);
     }      
     return r;
   }
@@ -114,10 +114,10 @@ module PRF_Game2(A : AdvPRF) = {
   proc main(q0:int) : bool = {
     var b;
     RO.init();
-    PRFOracleRO.max_q = q0;
-    PRFOracleRO.num_q = 0;
+    PRFOracleRO.max_q <- q0;
+    PRFOracleRO.num_q <- 0;
     
-    b = A.guess(q0);
+    b <- A.guess(q0);
     return b;
   }
 }.
@@ -373,8 +373,6 @@ rnd.
 auto.
 qed.
 
-(* TODO: Once the ROM module is fixed this can proceed.  *)
-
 
 op cardC = CTS.Support.card.
 
@@ -385,8 +383,10 @@ proof.
   byphoare => //.
   proc.
   inline PRF_Game2(B).A.guess.
+
+  (* TODO: Fix this *)
   seq 7: (PRFOracleRO.num_q < PRFOracleRO.max_q
-         /\ FMap.dom RO.m = FSet.of_list B.MacOra.msgLog) => //.
+         /\ dom RO.m = oflist B.MacOra.msgLog) => //.
 (* TODO:
 - Fix seq-call: make all the probability bounds in the different games correct
 - In first half: show invariant holds as postcondition

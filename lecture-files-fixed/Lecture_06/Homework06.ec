@@ -3,7 +3,6 @@
 pragma Goals:printall.
 
 require import AllCore.
-require import Distr.
 require DBool. (* We need to require this for the <$ {0,1} syntax to work *)
 
 module type Adv = {
@@ -31,7 +30,12 @@ qed.
 
 op dist: int -> int distr.
 module M2 = {
-  proc f(x1,x2:int) : int = { var y1, y2:int; y1 <$ dist x1; y2 <$ dist x2; return y1+y2; }
+  proc f(x1,x2:int) : int = {
+      var y1, y2:int;
+      y1 <$ dist x1;
+      y2 <$ dist x2;
+      return y1+y2; 
+      }
 }.
 
 
@@ -186,11 +190,6 @@ Don't forget to state that the adversary has the same global variables in both c
 
 No proof is needed.
 *)
-
-(* My attempt *)
-(* lemma problem6 (A<:Otp_adv):
-    equiv [ Otp_game(A).main(b=true) ~ Otp_game(A).main(b=false) :
-    ={glob A} ==> ={res} ]. *)
 
 lemma problem6 (A<:Otp_adv):
 equiv [ Otp_game(A).main ~ Otp_game(A).main:

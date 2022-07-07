@@ -133,7 +133,7 @@ module type MacOracleT = {
   proc query(m:Mblock): C 
 }.
 
-print List.
+
 
 module MacOracle:MacOracleT = {
   var k:K

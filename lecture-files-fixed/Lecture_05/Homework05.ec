@@ -1,5 +1,4 @@
 require import AllCore.
-require import Distr.
 
 (*
 Due: Mar 22, 2015
@@ -49,18 +48,23 @@ qed.
      possible.)
     *)
 
-    (* Fix the note to reflect the two predicate syntax *)
+    (* TODO: Fix the note to reflect the two predicate syntax *)
 lemma problem2 (x':int) &m:
     0<=x' =>
     Pr[M1.f(x') @ &m : 0<= res] >= 1%r/2%r.
 proof.
 move => H1.
-byphoare (_: 0<= x  ==> _) => //.
+byphoare (_: 0<= x  ==> _).
 proc.
 wp.
 skip.
+move => &m2 H2.
 smt.
+move => &m2 H2.
+simplify.
 smt.
+trivial.
+trivial.
 qed.
 
 module type Adv2 = {
