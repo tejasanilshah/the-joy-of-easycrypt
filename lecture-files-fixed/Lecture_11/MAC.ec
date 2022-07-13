@@ -374,6 +374,11 @@ auto.
 qed.
 
 
+(*
+TODO: This is carried over to the homework. Probably best to 
+leave it out. Discuss about this.
+*)
+
 op cardC = CTS.Support.card.
 
 local lemma forge_ro q &m:
