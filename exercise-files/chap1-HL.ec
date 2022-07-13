@@ -432,7 +432,7 @@ proof.
 proc.
 simplify.
 (* 
-To get rid of the loop, we need understand the behavior of the program, and 
+To get rid of the loop, we need to understand the behavior of the program, and 
 figure out a loop invariant. This is because we have the tactic:
 "while I"
 Where "I" is the loop invariant, that holds before and after the loop. 
