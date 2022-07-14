@@ -25,16 +25,16 @@ module Func1 = {
 EC allows us to define concretely defined procedures like we did above.
 But since we want to model adversaries about whom we know nothing,
 we can also define abstract procedures like an eavesdrop procedure 
-of an evil adversary. Like so:
+of an adversary. Like so:
 *)
-module type Evil_adv = {
+module type Adv = {
   proc eavesdrop () : bool
 }.
 
 (*
 We don't know what the procedure does, but we do know its return type.
 Also notice that now we have a module type and not just a module.
-This is because, Evil_adv is a type that we will need to instantiate.
+This is because, Adv is a type that we will need to instantiate.
 We will return to this later when we start working with cryptographic protocols.
 But this is an important fact that we need to keep in mind.
 *)
