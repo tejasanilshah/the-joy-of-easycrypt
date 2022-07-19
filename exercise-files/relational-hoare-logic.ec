@@ -58,25 +58,27 @@ in the previous exercise.
 *)
 
 lemma swaps_equivalent:
-equiv [Jumbled.swap1 ~  Jumbled.swap2 : ={x, y} ==> ={res}  ].
+equiv [Jumbled.swap1 ~  Jumbled.swap2 : ={x, y} ==> ={res} ].
 proof.
 proc.
 simplify.
 (*
-Now we have different programs, and the way we work with them is by using similar tactics
-that we used for HL. The only difference now is that we have to add identifiers 
+Now we have different programs, and the way we work with them is by 
+using similar tactics that we used for HL.
+The only difference now is that we have to add identifiers
 to the tactics for them to target specific sides and lines of code.
 For instance, for the sake of a demonstration let us use the wp tactic
 in an asymmetric way.
 *)
-wp 1 2.
+
+(* TODO: Fix this proof script and explanation! *)
+wp 4 4.
 (*
 wp n1 n2: Consumes exactly n1 lines of the first program,
 and n2 lines of the second program.
 *)
 wp 0 1.
 wp 0 0.
-(* TODO: Strange behaviour (Inconsistent with the manual) *)
 skip.
 trivial.
 qed.
@@ -127,7 +129,7 @@ module Abstract_game(A:Adv) = {
 (*
 At this stage, we don't know what A.eavesdrop_one does.
 Neither does EC. However, we can still prove certain facts
-related to it. Let us take a look at a simple example reflexivity
+related to it. Let us take a look at a simple reflexivity
 example to understand how that works.
 Notice that we have a new term glob A, in the precondition.
 It stands for the global variable of the module A.
@@ -139,7 +141,8 @@ that we haven't defined what the function is.
 *)
 
 lemma eavesdrop_reflex(A<:Adv):
-equiv [Abstract_game(A).one ~ Abstract_game(A).one : ={glob A} ==> ={res} ].
+equiv [Abstract_game(A).one ~ Abstract_game(A).one :
+      ={glob A} ==> res{1} = res{2} ].
 proof.
 proc.
 call (_: true).
@@ -152,7 +155,7 @@ qed.
 
 (*
 However, let us also define a concrete instantiation of Adv,
-and reason with it. A is quite basic, and either always returns
+and work with it. A is quite basic, and either always returns
 true or always returns false.
 *)
 
@@ -184,9 +187,8 @@ qed.
 (*
 The point of this detour is that,
 when we work with cryptographic proofs we will
-be dealing with adversaries both concrete and abstract ones,
-and we warming up and getting comfortable with EasyCrypt's
-tactics and ways.
+be dealing with adversaries both concrete and abstract ones.
+With these exercises are warming up and building up those concepts.
 *)
 
 (*
@@ -209,13 +211,18 @@ module Compiler = {
   }
 
   (*
-  As you can observe, the variable x is not affected by the loop,
-  hence to save computation, the compiler hoists that line out
-  of the scope of the while loop. Like so:
+  As you can observe, if the condition of the while loops holds
+  for even one iteration the variable x is set to z+1.
+  However every subsequent iteration of the loop doesn't change x,
+  since z is also constant. Hence to save on computation,
+  the compiler hoists that line out of the scope of the while loop.
+  Like so:
   *)
 
   proc optimized (x y z: int) : int*int = {
-    x <- z + 1;
+    if(y < z){
+      x <- z + 1;
+    }
     while (y < z){
       y <- y + 1;
     }
@@ -226,19 +233,49 @@ module Compiler = {
 (*
 Now let us try to prove the fact that
 the behaivour of both the programs is equivalent.
+To make the task a little easier, we start with the assumption that 
 *)
-lemma optimization_correct: equiv [Compiler.unoptimized ~  Compiler.optimized : ={x, y ,z} ==> ={res}  ].
+lemma optimization_correct_a:
+equiv [Compiler.unoptimized ~ Compiler.optimized:
+      ={x, y ,z} /\ (z{1}<y{1} \/ z{1}=y{1} ) ==> ={res}  ].
 proof.
 proc.
-sp.
 simplify.
+seq 0 1: (={x,y,z} /\(z{1}<y{1} \/ z{1}=y{1} )).
+if {2}.
+auto.
+smt.
+auto.
+rcondf {1} 0.
+auto.
+smt.
+rcondf {2} 0.
+auto.
+smt.
+auto.
+qed.
 
+lemma optimization_correct_b: 
+equiv [Compiler.unoptimized ~ Compiler.optimized:
+      ={x, y ,z} /\ y{1}<z{1} ==> ={res}  ].
+proof.
+proc.
+seq 0 1: (={y,z} /\ y{1}<z{1} /\ x{2} = z{2} + 1).
+simplify.
+auto.
+while (={y,z} /\ x{2} = z{2} + 1 /\ 
+  (y{1}<z{1} \/ x{1} = z{1} + 1)).
+auto.
+auto.
+smt.
+qed.
 
-(* swap {1} (1.2) 1. *)
-(* TODO: Help *)
-
-while ( y{1} < z{1} /\ y{2} < z{2}).
-
-(*
-TODO: Non-trivial RHL exercises.
-*)
+lemma optimization_correct:
+equiv [Compiler.unoptimized ~ Compiler.optimized:
+      ={x, y ,z} ==> ={res}  ].
+proof.
+proc.
+simplify.
+case (y{1}<z{1}) => //.
+admit.
+admit.

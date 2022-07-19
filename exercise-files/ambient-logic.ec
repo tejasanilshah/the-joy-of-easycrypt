@@ -1,5 +1,5 @@
 (* 
-Welcome to Proof-General, the front-end the we use to work with EasyCrypt (EC).
+Welcome to Proof-General, the front-end that we use to work with EasyCrypt (EC).
 Proof-General itself is based on Emacs, so most of the standard Emacs keybindings
 work as well.
 All commands begin either with the CONTROL key, denoted by "C", 
@@ -46,7 +46,7 @@ pragma Goals: printall.
 
 (*
 Now, let us start with something trivial to prove.
-Let us start reflexivity of integers.
+Let us start with the reflexivity of integers.
 Reflexivity is simply the property that an integer is equal to itself.
 Mathematically, we would write it like so:
 For every integer x, x=x.
@@ -247,7 +247,7 @@ proof.
     simplify.
     trivial.
     (* Both of those tactics don't work. We need something else here *)
-    (* Let us see is EC has something that we can use. *)
+    (* Let us see if EC has something that we can use. *)
     search (<) (+) (0) (=>).
     rewrite addz_gt0.
     (* Splits into two goals *)
@@ -265,7 +265,8 @@ proof.
 qed.
 
 (*
-"rewrite" simply rewrites the pattern provided, it can be interchanged with apply.
+"rewrite" simply rewrites the pattern provided,
+it can be interchanged with apply.
 *)
 
 (* Let us see some variations *)
@@ -287,15 +288,19 @@ qed.
 (* 
 Recap:
 So far we have seen the following tactics:
-trivial, simplify, apply, rewrite, split, left, right, admit, assumption, 
+trivial, simplify, apply, rewrite,
+move, split, left, right, admit, and assumption.
 We also saw how to print and search for patterns.
 These are at the foundation of how we work with EC.
+*)
 
-Intro to smt:
-An important point to understand, however, is that EC was built to work with cryptographic
-properties and more complex things. So although other mathematical theorems and claims 
-can be proven in EC, it will be quite painful to do so. We will employ powerful automated tools
-to take care of some of these low level tactics and logic.
+(*
+Intro to smt and external provers:
+An important point to understand, however, is that EC
+was built to work with cryptographic properties and more complex things.
+So although other mathematical theorems and claims can be proven in EC,
+it will be quite painful to do so. We will employ powerful automated tools
+to take care of some of these low-level tactics and logic.
 EC offers this in the form of the "smt" tactic.
 When we run smt, EC sends the conclusion and the context to external smt solvers.
 If they are able to sovle the goal, then EC completes the proof.
@@ -309,9 +314,10 @@ qed.
 
 (*
 As you can see, smt can make our lives much easier.
-Now, here are some properties about logarithms that are mentioned in
-The Joy of Cryptography. We leave them to be completed as exercises, without using the smt tactic.
-Most of them are straightforward and serve the purpose of exercising the use of basic tactics.
+Now, here are some properties about logarithms that are mentioned in 
+The Joy of Cryptography. We leave them to be completed as exercises,
+without using the smt tactic. Most of them are straightforward and
+serve the purpose of exercising the use of basic tactics.
 *)
 
 require import AllCore.
@@ -375,7 +381,8 @@ proof.
 smt.
 qed.
 
-lemma log_product (x y a : real): 0%r < x  => 0%r < y => log a (x*y) = log a x + log a y.
+lemma log_product (x y a : real):
+    0%r < x  => 0%r < y => log a (x*y) = log a x + log a y.
 proof.
     move => H1 H2.
     rewrite /log.

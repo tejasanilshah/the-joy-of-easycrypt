@@ -51,7 +51,7 @@ keyword called res.
 lemma triple1: hoare [ Func1.add_1 : x = 1 ==> res = 2].
 proof.
 (*
-When working with hoare logic, or pHL, or pRHL, the goal will be different from
+When working with hoare logic, or its variants, the goal will be different from
 what a goal in ambient logic looks like. We need to start stepping through
 the procedure or program that is being reasoned about and change the
 preconditions and postconditions according axioms and lemmas that we have.
@@ -105,7 +105,11 @@ and S1; S2; S3 are statments of a program.
 Applying the "wp" tactic consumes as many ordinary statements as possible from
 the end. Then it replaces the postcondition Q, with the weakest precondition R.
 R is such that R in conjunction with the consumed statements and the original 
-post condition hold. It is easier to see as a visualization.
+post condition hold. It is easier to vizualize this in a proof-tree.
+For instance, when we have
+{P} S1; S2; S3; {Q} and
+S2; S3 are statements that can be dealt with some axioms or logical deductions,
+then wp does the following:
 
             {P} S1; S2; S3 {Q}
   --------------------------------------wp
@@ -113,10 +117,13 @@ post condition hold. It is easier to see as a visualization.
   --------------------------------------
                {P} S1; {R}
 
-The triple {R} S2; S3; {Q} is guaranteed to hold, and hence the goal transforms to
+The triple {R} S2; S3; {Q} is guaranteed to hold, and
+hence the goal transforms to
 just {P} S1; {R}
+*)
 
-In our context the proof tree looks like so.
+(*
+Let us see what happens in our context.
 The wp tactic, consumes the only statement in the program.
 In this case an assignment, and replaces the variable like we'd expect.
 When we have an empty program, we can simply use the "skip" tactic
@@ -149,18 +156,20 @@ module Func2 = {
 Exercises:
 Define a few triples relating the behaviour of these functions.
 For instance try to define the following triples and prove them:
-1. {x = 2} Func2.x_sq {res = 4}
-2. {x= 10} Func2.x_0 {res = 0}
-3. {true} Func2.x_15 {res = 15}
+1. {x =  2} Func2.x_sq {res = 4}
+2. {x = 10} Func2.x_0  {res = 0}
+3. {true}   Func2.x_15 {res = 15}
 *)
 
 (* Using some automation *)
 
 (*
 We generally don't want to be dealing with the low-level proofs,
-so we will be combining Hoare logic with the external solvers that we saw earlier.
-One thing to remember is that the external solvers work only with ambient logic goals.
-So we need to get the goals state to something that the smt solvers can work with.
+so we will be combining Hoare logic with the external solvers
+that we saw earlier. One thing to remember is that the external
+solvers work only with ambient logic goals.
+So we need to get the goals state to something that the smt solvers
+can work with.
 *)
 
 lemma triple3: hoare [ Func2.x_sq : 4 <= x ==> 16 <= res ].
@@ -464,7 +473,7 @@ That is clearly incorrect, since r0 isn't bound or related to x or i0.
 You are welcome to experiment and try to see how far you can get in
 the proof. However in our attempt, the goal simply becomes harder to read.
 Using wp, and skip introduces memory into the context making it quite difficult to
-read. We will abort this attempt here, and try to think of a stronger invariant.
+read. We will "abort" this attempt here, and try to think of a stronger invariant.
 *)
 abort.
 
@@ -599,8 +608,7 @@ while (r=x^i /\ 0 <= i <= n); wp; skip; smt.
 qed.
 
 (*
-As an exercise, you can do similar proof for simple mathematical functions.
-For instance
+As an exercise, you can do similar proofs for the following mathematical functions:
 1. A program to decide the if a given number is even or odd.
-2. A program to compute the factorial of given number. etc.
+2. A program to compute the factorial of given number.
 *)
