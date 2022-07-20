@@ -430,3 +430,30 @@ equiv [Compiler2.unoptimized ~ Compiler2.optimized:
       ={x} ==> ={res}  ].
 proof.
 admit.
+qed.
+
+(*
+Now we define two more code blocks with similar deadcode,
+except this time the variables y,z are not fixed like in
+the previous code.
+Prove that both these code blocks acheive the same result.
+You could make progress by breaking the proof into
+two parts, one in which the while loop is never 
+executed, and another in which it is executed at least once.
+After that you could put them together.
+*)
+module Compiler3 = {
+  proc unoptimized (x y z: int) : int = {
+    while(z<y){
+      z<-z+1;
+    }
+    x <- x + 1;
+    return x;
+  }
+
+  proc optimized (x: int) : int = {
+    x <- x + 1;
+    return x;
+  }
+}.
+
