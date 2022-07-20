@@ -70,13 +70,18 @@ to the tactics for them to target specific sides and lines of code.
 For instance, for the sake of a demonstration let us use the wp tactic
 in an asymmetric way.
 *)
-
-(* TODO: Fix this proof script and explanation! *)
-wp 4 4.
+wp 2 3.
 (*
-wp n1 n2: Consumes exactly n1 lines of the first program,
-and n2 lines of the second program.
+The tactic "wp n1 n2" will try to consume code
+up to the n1-th line from the left program,
+up to the n2-th line from the right program.
+As you can see here, using "wp 2 3"
+knocks off the 3rd line from the left program,
+and leaves the right program untouched.
+Try C-c C-u to undo and then C-c C-n
+to redo and notice how things change.
 *)
+wp 2 2.
 wp 0 1.
 wp 0 0.
 skip.
@@ -85,8 +90,10 @@ qed.
 
 (*
 To be fair, the equivalence of swap1 and swap2
-is quite easy to prove, let us use the power of auto to
-clean up the proof.
+is quite easy to prove, and we used a simple example
+to illustrate how to use the wp tactic.
+These tactics can be replaced with "auto".
+So let us clean up the proof using auto.
 *)
 
 lemma swaps_equivalent_clean:
@@ -147,8 +154,10 @@ proof.
 proc.
 call (_: true).
 (*
-TODO: How do I explain this?
-Manual is a bit messy as usual.
+the call tactic does a few complicated things under the hood,
+but at this point of time, what we can take away is that 
+if there is a call to the same abstract function on both
+sides, call (_: true), knocks them both off.
 *)
 auto.
 qed.
@@ -197,7 +206,7 @@ something non-trivial in RHL.
 As we discussed earlier, one of the use cases of RHL
 is to ensure that compiler optimizations preserve program behaviour.
 Let us take a look at an example of this with a simple compiler
-optimization called invariant hoisting.
+optimization called "invariant hoisting".
 Take a look at the programs defined below.
 *)
 
@@ -233,49 +242,191 @@ module Compiler = {
 (*
 Now let us try to prove the fact that
 the behaivour of both the programs is equivalent.
-To make the task a little easier, we start with the assumption that 
+At this point there can be two possibilities:
+1. !(y < z) => (y = z) \/ (z < y):
+In this case neither the while loop, nor the if condition are satisfied.
+So both the programs effectively do nothing to the variables.
+
+or
+
+2. (y < z): 
+The while loop and the if condition executed at least once.
+In this case the variables are modified.
+
+So in order to prove that the optimization is indeed correct, we can
+break our proof into these two cases, prove them independantly
+and then put them back together.
+
+An important point to note here is that, this proof took multiple attempts
+and a fair amount of time to polish. It is important to understand
+that this is a normal process, and takes practice to be able
+to work with logic. Anyway, let us trudge on.
+
+Let us work with the first part in which the loops are never executed.
 *)
 lemma optimization_correct_a:
 equiv [Compiler.unoptimized ~ Compiler.optimized:
-      ={x, y ,z} /\ (z{1}<y{1} \/ z{1}=y{1} ) ==> ={res}  ].
+      ={x, y ,z} /\ (z{1}=y{1} \/ z{1}<y{1}) ==> ={res}  ].
 proof.
 proc.
 simplify.
-seq 0 1: (={x,y,z} /\(z{1}<y{1} \/ z{1}=y{1} )).
-if {2}.
+(*
+At this point we introduce the seq tactic.
+The seq tactic does the following:
+
+         {P} A1; A2; A3 ~ B1; B2; B3 {Q}
+  ----------------------------------------------- seq 1 2: ({R})
+   {P} A1; ~ B1; B2; {R}  {R} A2; A3; ~ B3; {Q}
+
+In general, the idea behind using the seq tactic is to
+break the programs into manageable chunks, and deal with them
+separately.
+In our program, we have an if condition, that
+we can effectively deal with and then work with the while
+conditions.
+In this part of the proof, we know that the code inside the
+conditions is not executed. Hence we pass precondition as the {R}
+and we knock off the "if" from the right program.
+*)
+seq 0 1: ( ={x, y ,z} /\ (z{1}=y{1} \/ z{1}<y{1})  ).
+(* Pause and see how the goal changed and now we have two goals to prove *)
 auto.
-smt.
+smt().
+(*
+Now we know that neither of the while conditions
+hold. So like we did earlier, we will use the rcondf to work with them.
+rcondf breaks the goal into two, first part keeps everything before the while
+intact. In our case, there is nothing so it adds a "skip", and a post-condition
+which is the negation of the boolean expression of the while.
+So in our case !(y < z).
+When working with RHL, we have to use program identifiers, so that
+EC can target the correct side and lines of code.
+*)
+rcondf {1} 1.
 auto.
-rcondf {1} 0.
+smt().
+(* Similarly, we work with the right program. *)
+rcondf {2} 1.
 auto.
-smt.
-rcondf {2} 0.
-auto.
-smt.
+smt().
 auto.
 qed.
+
+(*
+Here we have used "smt()." instead of "smt."
+"smt()." simply sends only the goal (conclusion and hypothesis)
+to the external solvers.
+While "smt." tries to pick an extra set of lemmas to send as well.
+If this process of picking what to send fails, the tactic will
+send all lemmas of all the theories in the context.
+This can be quite huge, and ultimately inefficient.
+
+For smaller proofs, like ours, using either works fine, however
+in the interest of efficiency, using "smt()." is recommended.
+Often, if we know a certain lemma will be used for a proof,
+we can send the specific lemmas to the external solvers like so:
+smt(lemma_1,lemma_2,...,lemma_n).
+*)
+
+
+(*
+Now let us work with the second part of the proof which deals with
+the part where the loops are executed.
+The only complex part of this proof is the while loop.
+So please pause before and after to ponder about the invariant.
+*)
 
 lemma optimization_correct_b: 
 equiv [Compiler.unoptimized ~ Compiler.optimized:
       ={x, y ,z} /\ y{1}<z{1} ==> ={res}  ].
 proof.
 proc.
+(*
+As we did earlier, we will get rid of the if,
+but this time we know that it will be executed,
+hence we have x{2} = z{2} + 1 in the condition.
+*)
 seq 0 1: (={y,z} /\ y{1}<z{1} /\ x{2} = z{2} + 1).
 simplify.
 auto.
-while (={y,z} /\ x{2} = z{2} + 1 /\ 
-  (y{1}<z{1} \/ x{1} = z{1} + 1)).
+while (={y,z} /\ x{2} = z{2} + 1 /\ (y{1}<z{1} \/ x{1} = z{1} + 1)).
 auto.
 auto.
-smt.
+smt().
 qed.
+
+(*
+Now let us put these two things together.
+We will be 
+*)
 
 lemma optimization_correct:
 equiv [Compiler.unoptimized ~ Compiler.optimized:
       ={x, y ,z} ==> ={res}  ].
 proof.
-proc.
-simplify.
-case (y{1}<z{1}) => //.
-admit.
+proc*.
+(*
+Here we introduce "proc*",
+proc* modifies the goal in a way similar to "proc", but
+without losing the fact that the code is infact a procedure call.
+With proc, we usually lose this connection to the procedures.
+*)
+
+(*
+Now we split on the boolean expression of the while condition.
+Although we can't see it in the goal explicitly, we know this
+is what we need to do since we put together two parts earlier.
+*)
+case (y{1}<z{1}).
+(*
+Notice how the goals changed, and how these are the exactly our
+previous two parts.
+*)
+call optimization_correct_b. simplify. auto.
+call optimization_correct_a. simplify. auto.
+smt().
+qed.
+
+(*
+Exercises:
+The compiler optimization that we presented above
+was called "invariant hoisting". These kinds of optimizations
+are part of a larger set of optimizations that are called
+dead store optimizations. You can read more about them
+here.
+https://en.wikipedia.org/wiki/Dead_store
+However, as an exercise we suggest that you can try to implement
+some other compiler optimizations and prove that
+they preserve program behavior.
+We provide another example here for the reader to complete.
+There are two possible approaches here.
+You could unroll the while loop 10 times, and continue on.
+Or figure out an invariant to progress.
+You might also need the tactic "sp", since we have some instructions
+before the while loop, that can be knocked off automatically.
+Alternatively you could use the "seq" tactic as well.
+*)
+
+module Compiler2 = {
+  proc unoptimized (x: int) : int = {
+    var y, z;
+    y<-10;
+    z <-0;
+    while(z<y){
+      z<-z+1;
+    }
+    x <- x + 1;
+    return x;
+  }
+
+  proc optimized (x: int) : int = {
+    x <- x + 1;
+    return x;
+  }
+}.
+
+lemma optimization2_correct:
+equiv [Compiler2.unoptimized ~ Compiler2.optimized:
+      ={x} ==> ={res}  ].
+proof.
 admit.
