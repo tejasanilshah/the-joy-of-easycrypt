@@ -1,5 +1,7 @@
-> Program testing can be used to show the presence of bugs, but never to show their absence!
-> --Edsger W. Dijkstra
+# Preface
+
+> ### "Program testing can be used to show the presence of bugs, but never to show their absence!"
+> ### - Edsger W. Dijkstra 
 
 Building reliable software is extremely hard. In order to provide guarantees of a software's reliability there are plenty of different approaches that we employ, ranging from testing to various software building methodologies. However, these are among the weakest guarantees that we can provide or are simply best practices that can ensure some level of reliability.
 
@@ -12,7 +14,7 @@ We will take look at how the field developed, and trace the need for formal veri
 ## Formal Verification: A brief history
 The ideas of formal verification can be traced back to the 17th century and Leibniz's ideas about characteristica universalis, a universal conceptual language that could be used to solve the logical problems. However, we do not need to go that far back, for our intents and purposes computer-aided math came into limelight with the famous four colour theorem being proven with the help of computers by Appel and Haken [cite]. 
 
-The problem statement is quite simple and elegant. It says,\enquote{Any planar map can be coloured with only four colours}. The computer-aided proof of the problem attracted plenty of criticism since it was done by performing an exhaustive case analysis of a billion cases. This simply means the computer went through every single case that could arise when trying to colour a map, and came back saying that four colours is all it takes. So for an elegant problem the proposed computer-aided proof simply felt like using a sledgehammer to crack a seemingly innocent nut, and a lot of mathematicians at the time cried foul.
+The problem statement is quite simple and elegant. It says, "Any planar map can be coloured with only four colours". The computer-aided proof of the problem attracted plenty of criticism since it was done by performing an exhaustive case analysis of a billion cases. This simply means the computer went through every single case that could arise when trying to colour a map, and came back saying that four colours is all it takes. So for an elegant problem the proposed computer-aided proof simply felt like using a sledgehammer to crack a seemingly innocent nut, and a lot of mathematicians at the time cried foul.
 
 Criticism aside, proving the four colour theorem with the help of a computer set off more work and efforts in the field as the ideas from that endeavour were later distilled. Other mathematicians like Robertson, et al and Gonthier, came up with more “elegant” proofs that first reduced the cases by a factor of four [cite], and then to a meagre 633 cases [cite] respectively.
 
@@ -28,9 +30,9 @@ In the paper, Halevi highlights that cryptography as a field has advanced to the
 
 At this point, it is a good idea to read Sec 1.1 of JoC to get an understanding of what cryptography is, and what it is not. To summarise and add to the ideas from JoC, modern cryptography deals with three main problems of communication. They are:
 
-1. *Privacy*: Protecting information from being accessed by unauthorised parties
-2. *Integrity*: Protecting information from being tampered or altered
-3. *Authenticity*: Making sure the information is from an authentic source
+2. **Integrity**: Protecting information from being tampered or altered
+1. **Privacy**: Protecting information from being accessed by unauthorised parties
+3. **Authenticity**: Making sure the information is from an authentic source
 
 Each of these properties can be defined as mathematical properties of information, and to state that a cryptographic protocol protects a certain property is to prove that the information possesses that mathematical property. Given that the proofs can be complicated and hard to follow, the idea of using computers to verify the proofs comes in here.
 
@@ -38,7 +40,7 @@ To illustrate this idea better, let us first meet Alice, Bob and Eve. We will as
 
 These ideas and the games that Alice, Bob and Eve play, are essentially the cornerstones of provable and verifiable security.
 
-## Criticism of Computer-aided Cryptography}
+## Criticism of Computer-aided Cryptography
 
 Although the need for the field has been well established it faces a number of challenges and has its own shortcomings. The main criticism being that a few big important protocols, such as Bluetooth, and TLS, are verified however they are less likely to discover flaws since these protocols are subject to extensive testing and attack. Whereas the protocols that aren't used to support major industrial applications generally aren't subject to the same level of scrutiny. They only receive limited manual testing. 
 
