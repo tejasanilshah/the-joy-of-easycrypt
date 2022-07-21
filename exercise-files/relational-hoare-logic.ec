@@ -37,13 +37,15 @@ On paper we define hoare quadruples like so:
 {P} C1 ~ C2 {Q}
 While in EC, we use the following syntax to say the same:
 equiv [C1 ~ C2 := P ==> Q]
-As with Hoare triples in EC, we access the results of both the programs using the
-"res" keyword. The numbers in the curly braces are the identifiers.
+As with Hoare triples in EC, we access the results of
+both the programs using the "res" keyword. 
+The numbers in the curly braces are the identifiers.
 So res{1} should be read as result from program 1.
 Let us first prove that swap1 is equivalent to itself.
 *)
 lemma swap1_equiv_swap1:
-equiv [Jumbled.swap1 ~  Jumbled.swap1 : x{1}=x{2} /\ y{1}=y{2} ==> res{1} = res{2}].
+equiv [Jumbled.swap1 ~  Jumbled.swap1 : 
+      x{1}=x{2} /\ y{1}=y{2} ==> res{1} = res{2}].
 proof.
 proc.
 simplify.
@@ -53,8 +55,8 @@ qed.
 (*
 Let us now prove that both the swap functions are equivalent.
 Notice the shorthand that we use for the conditions.
-The eagle-eyed readers would've noticed this shorthand in the goals pane
-in the previous exercise.
+The eagle-eyed readers would've noticed this
+shorthand in the goals pane in the previous exercise.
 *)
 
 lemma swaps_equivalent:
@@ -183,7 +185,8 @@ module Games = {
   proc f(): bool = { var x; x <- A.eavesdrop_two(); return x; }
 }.
 
-lemma games_quadruple (A<:Adv): equiv [Games.t ~ Games.f : ={glob A} ==> res{1} <> res{2}].
+lemma games_quadruple (A<:Adv):
+    equiv [Games.t ~ Games.f : ={glob A} ==> res{1} <> res{2}].
 proof.
 proc.
 inline *.
@@ -399,12 +402,13 @@ However, as an exercise we suggest that you can try to implement
 some other compiler optimizations and prove that
 they preserve program behavior.
 We provide another example here for the reader to complete.
+
 There are two possible approaches here.
 You could unroll the while loop 10 times, and continue on.
 Or figure out an invariant to progress.
 You might also need the tactic "sp", since we have some instructions
 before the while loop, that can be knocked off automatically.
-Alternatively you could use the "seq" tactic as well.
+Alternatively, you could use the "seq" tactic as well.
 *)
 
 module Compiler2 = {
