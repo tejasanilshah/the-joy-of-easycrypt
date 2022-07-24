@@ -14,4 +14,6 @@ A tip that we can provide is to simply start and learn as you go.
 
 As with JoC, **joy is not guaranteed**.
 
+---
+
 <sup>* If you do not understand what that means, it is alright, we develop the required background.</sup>

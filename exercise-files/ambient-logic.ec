@@ -1,16 +1,16 @@
 (* 
-Welcome to Proof-General, the front-end that we use to work with EasyCrypt (EC).
-Proof-General itself is based on Emacs, so most of the standard Emacs keybindings
-work as well.
-All commands begin either with the CONTROL key, denoted by "C", 
+As we saw earlier in the abstract-ind-ror.ec file,
+we use Emacs, and ProofGeneral to work with EasyCrypt.
+We will need various commands/keybindings to work with Emacs.
+All the keybindings begin either with the CONTROL key, denoted by "C",
 or the META or ALT key denoted by "M".
 So if you see "C-c C-n" it simply means: CONTROL + c and then CONTROL + n.
-Go ahead, try it. This will evaluate the current comment and
-place a black dot on the left margin at the beginning of the next one.
+Go ahead, try it. This will evaluate the current comment, highlight it
+to indicate that it has been evaluated and will place a small black dot on the
+left margin at the beginning of the next block to be evaluated.
 *)
 
 (*
-The black dot denotes the point until which EC has already evaluated the script.
 Most formal proofs are written interactively.
 The proof-assistant, EC in our case, will keep track of the goals
 (context, and conclusions) for us.
@@ -21,7 +21,7 @@ Our objective is to use different tactics to prove or "discharge" the goal.
 Since we only have comments so far there are no goals for EC to work with.
 We will change that in a short while.
 *)
-
+ 
 (*
 Here is a short list of keystrokes that will come in handy for this file:
 1. C-c C-n :  Evaluate next line or block of code 
