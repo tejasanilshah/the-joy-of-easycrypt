@@ -59,7 +59,7 @@ Or alternatively, move the cursor to the line with the lemma,
 and hit C-c C-ENTER.
 *)
 
-lemma int_refl (x: int): x = x.
+lemma int_refl: forall (x: int), x = x.
 (*
 Notice how EC populates the goals pane on the right
 with the context and the conclusion.
@@ -108,10 +108,12 @@ print (+).
 print min.
 
 (*
-Now EC, knows the lemma int_refl, and allows us to use it to prove other lemmas.
+Now EC knows the lemma int_refl, and allows us to use it to prove other lemmas.
 Although the next lemma is trivial, it illustrates the idea of this applying 
 known results.
 *)
+
+print Int.
 
 lemma forty_two_equal: 42 = 42.
 proof.
@@ -129,7 +131,6 @@ nothing, and it concludes the proof.
 
 (* 
 EC comes with a lot of predefined lemmas and axioms that we can use.
-Axioms don't need any proofs while lemmas require proofs, like we'd expect.
 Let us now look at axioms about commutativity and associativity for integers.
 They are by the names addzC, and addzA. Print them out as an exercise.
 *)
@@ -220,7 +221,7 @@ Notice the extra space for the "*" operator.
 We need that since (* *) also indicates comments.
 *)
 
-search (+) ( = ) (=>).
+search (+) (=) (=>).
 (* List of operators "=>" is the implication symbol *)
 
 (*---- Exercises ----*)
@@ -234,8 +235,8 @@ qed.
 
 (*
 So far, we saw lemmas without any assumptions 
-except for that of the type of the variable in quesiton.
-More often than not we will have assumption regarding variables.
+except for that of the type of the variable in question.
+More often than not we will have assumptions regarding variables.
 We need to treat these assumptions as a given and introduce them into the context.
 This is done by using "move => ..." followed by the name you want to give
 the assumption.
@@ -249,7 +250,7 @@ proof.
     (* Both of those tactics don't work. We need something else here *)
     (* Let us see if EC has something that we can use. *)
     search (<) (+) (0) (=>).
-    rewrite addz_gt0.
+    apply addz_gt0.
     (* Splits into two goals *)
 
         (* Goal 1: 0 < x *)
@@ -275,17 +276,22 @@ lemma int_assoc_rev (x y z: int): x + y + z = x + (y + z).
 proof.
     print addzA.
     (* 
-    We might have the a lemma or an axiom that we can apply to the goal,
-    but the LHS and RHS might be flipped, and EC will complain that they
+    We might have a lemma or an axiom that we can apply to the goal,
+    but the LHS and RHS might be flipped, and EC will complain that
     they don't match to apply them.
-    To apply a lemma or axiom in reverse, we simply add the "-" infront
+    To rewrite a lemma or axiom in reverse, we simply add the "-" infront
     of the lemma to switch the sides like so.
     *)
     rewrite -addzA.
     trivial.
 qed.
 
-(* 
+(*
+Note that here "apply addzA." or "apply -addzA" do not work
+We encourage you to try them.
+*)
+
+(*
 Recap:
 So far we have seen the following tactics:
 trivial, simplify, apply, rewrite,
@@ -303,7 +309,7 @@ it will be quite painful to do so. We will employ powerful automated tools
 to take care of some of these low-level tactics and logic.
 EC offers this in the form of the "smt" tactic.
 When we run smt, EC sends the conclusion and the context to external smt solvers.
-If they are able to sovle the goal, then EC completes the proof.
+If they are able to solve the goal, then EC completes the proof.
 If not smt fails and the burden of the proof is still on us.
 *)
 
@@ -342,10 +348,11 @@ proof.
     trivial.
 qed.
 
+lemma exp_product_smt (x: real) (a b: int): x <> 0%r => x^a * x^b = x^(a + b).
+smt.
+
 (* Logarithm exercises *)
-print Real.
 require import RealExp.
-print RealExp.
 
 print ln.
 search ln.
@@ -355,7 +362,6 @@ proof.
     move => H1 H2.
     by apply lnM.
 qed.
-
 
 print log.
 (*
@@ -392,7 +398,17 @@ proof.
     by apply helper.
 qed.
 
-(* Modulo arithmatic exercises *)
+(* Or we can simply let smt do the heavy lifting for us *)
+lemma log_product_smt (x y a : real):
+    0%r < x  => 0%r < y => log a (x*y) = log a x + log a y.
+proof.
+    smt.
+qed.
+
+(*
+Modulo arithmatic exercises:
+This is one of the properties that is mentioned in the
+ *)
 require import IntDiv.
 
 lemma mod_add (x y z: int): (x %% z + y %% z) %% z = (x + y) %% z.

@@ -18,14 +18,14 @@ module Func1 = {
      return type of procedures in the definition.
   *)
 
-  proc add_2 (x: int) : int = {x<- x + 2; return x; }
+  proc add_2 (x: int) : int = { x<- x + 2; return x; }
 }.
 
 (*
 EC allows us to define concretely defined procedures like we did above.
 But since we want to model adversaries about whom we know nothing,
-we can also define abstract procedures like an eavesdrop procedure 
-of an adversary. Like so:
+we can also define abstract procedures like an eavesdrop procedure.
+of an adversary. Like so: 
 *)
 module type Adv = {
   proc eavesdrop () : bool
@@ -34,7 +34,9 @@ module type Adv = {
 (*
 We don't know what the procedure does, but we do know its return type.
 Also notice that now we have a module type and not just a module.
-This is because, Adv is a type that we will need to instantiate.
+This is because Adv is a type that we will need to instantiate.
+We had similar ideas in the abstract-ind-ror.ec
+Where the Adversary module type had a "guess" procedure.
 We will return to this later when we start working with cryptographic protocols.
 But this is an important fact that we need to keep in mind.
 *)
@@ -54,12 +56,12 @@ proof.
 When working with hoare logic, or its variants, the goal will be different from
 what a goal in ambient logic looks like. We need to start stepping through
 the procedure or program that is being reasoned about and change the
-preconditions and postconditions according axioms and lemmas that we have.
+preconditions and postconditions according to the axioms and lemmas that we have.
 To make progress here, we first need to tell EC what Func1.add_1 is.
 The way to do that is by using the "proc" tactic.
 It simply fills in the definitions of the procedures that we define.
 *)
-proc.
+  proc.
 
 (*
 When the goal’s conclusion is a statement judgement whose program is empty,
@@ -67,8 +69,14 @@ like we have now the "skip" tactic reduces it to the goal whose conclusion
 is the ambient logic formula P => Q,
 where P is the original conclusion’s precondition, 
 and Q is its postcondition.
+
+Visually, skip works in the following way:
+
+     {P}     {Q}
+  ----------------- skip
+       P => Q
 *)
-skip.
+  skip.
 
 (*
 Now we are back in familiar territory, except the fact that
@@ -76,21 +84,21 @@ we have an interesting "&hr" lurking in the goal.
 This refers to the memory in which the program acts.
 When we deal with multiple programs, there is a possibility
 that the variables come from different memories. So EC provides us
-a different name spaces to deal with them.
+different namespaces to deal with them.
 To introduce memory into the context we need to prepend "&" to a variable name.
 Like so:
 *)
-move => &m H1.
+  move => &m H1.
 
-subst.
+  subst.
 (* The "subst" tactic simply substitutes variables *)
-trivial.
+  trivial.
 qed.
 
 
 lemma triple2: hoare [ Func1.add_2 : x = 1 ==> res = 3 ].
 proof.
-proc.
+  proc.
 
 (*
 Now we have a program which is not empty,
@@ -98,14 +106,11 @@ so we can't use the "skip" tactic directly.
 Thankfully we learnt about the different axioms in hoare logic.
 
 When we are faced with 
-{P} S1; S2; S3; {Q}
-where P, and Q are pre and post conditions as usual,
-and S1; S2; S3 are statments of a program.
-
-Applying the "wp" tactic consumes as many ordinary statements as possible from
+{P} S1; S2; S3; {Q} (with the usual definitions)
+applying the "wp" tactic consumes as many ordinary statements as possible from
 the end. Then it replaces the postcondition Q, with the weakest precondition R.
 R is such that R in conjunction with the consumed statements and the original 
-post condition hold. It is easier to vizualize this in a proof-tree.
+post condition hold. It is easier to visualize this in a proof-tree.
 For instance, when we have
 {P} S1; S2; S3; {Q} and
 S2; S3 are statements that can be dealt with some axioms or logical deductions,
@@ -124,7 +129,7 @@ just {P} S1; {R}
 
 (*
 Let us see what happens in our context.
-The wp tactic, consumes the only statement in the program.
+The "wp" tactic consumes the only statement in the program.
 In this case an assignment, and replaces the variable like we'd expect.
 When we have an empty program, we can simply use the "skip" tactic
 and continue with our proof. 
@@ -136,11 +141,11 @@ and continue with our proof.
                 x = 1  => x+2=3
 *)
 
-wp.
-skip.
-move => &m x.
-subst.
-trivial.
+  wp.
+  skip.
+  move => &m x.
+  subst.
+  trivial.
 qed.
 
 (*
@@ -176,6 +181,7 @@ lemma triple3: hoare [ Func2.x_sq : 4 <= x ==> 16 <= res ].
 proof.
 proc.
 skip.
+move => &m H1.
 (*
 Here this conclusion is trivial for us to understand and prove on paper
 however it can be quite hard to do with EC, so we will simply outsource it to smt.
@@ -231,7 +237,7 @@ to the assumptions.
 Pause here for a moment and ponder about what the goal currently says.
 It says that assuming that "false" holds, we want to prove that 15 = 0.
 As absurd as it is, we know that "false" is the strongest statement there is.
-And we have arrived to a state where "false" holds.
+And we have arrived at a state where "false" holds.
 This would imply that anything and everything can be derived from false.
 Hence we can actually "prove" that 15 = 0.
 *)
@@ -265,64 +271,84 @@ proc flipper (x: bool) : bool =
   }
 }.
 
-lemma flipper_correct: hoare [ Flip.flipper : x = true ==> res = false ].
+lemma flipper_correct_t: hoare [ Flip.flipper : x = true ==> res = false ].
 proof.
-proc.
-(*
-When the first statement of the program is an if condition, we can use the
-"if" tactic to branch into two different goals with appropriate truth values for
-the if condition.
-In our case, the goal branches into x = true, and x <> true based, and these
-conditions are added to the preconditions.
-*)
-if.
-
-  (*Goal 1:  x = true *)
-  wp.
-  auto.
- 
-  (* If the current goal is a HL, pHL, pRHL statement the "auto" tactic
-    uses various program logic tactics in an attempt to reduce the goal
-    to a simpler one. It never fails, but may fail to make any progress. *)
-
-  (* Goal 2: x <> true.
-  Yields a contradiction in the assumptions.
-  We will use some automation to deal with it.
+  proc.
+  (*
+  When the first statement of the program is an if condition, we can use the
+  "if" tactic to branch into two different goals with appropriate truth values for
+  the if condition.
+  In our case, the goal branches into x = true, and x <> true based, and these
+  conditions are added to the preconditions.
   *)
-  wp.
-  auto.
-  smt.
+  if.
+    (*Goal 1:  x = true *)
+    auto.
+ 
+    (*
+    If the current goal is a HL, pHL, pRHL statement the "auto" tactic
+    uses various program logic tactics in an attempt to reduce the goal
+    to a simpler one. It never fails, but may fail to make any progress.
+    In this usage, it replaces "wp. skip. and trivial."
+    *)
+
+    (* Goal 2: x <> true.
+    Yields a contradiction in the assumptions.
+    Since our precondition states that x = true /\ x <> true
+    We will use some automation to deal with it.
+    *)
+    auto.
+    smt.
 qed.
 
 (*
 Notice the repetition of proof steps in the branches.
 This can be reduced by using tacticals.
-In order to tell EC to repeated use certain tactics on all
+In order to tell EC to repeatedly use certain tactics on all
 resulting goals, we use the ";" tactical.
 So, we can simplify the above proof like so:
 *)
 
-lemma flipper_correct': hoare [ Flip.flipper : x = false ==> res = true ].
+lemma flipper_correct_f: hoare [ Flip.flipper : x = false ==> res = true ].
 proof.
-proc.
-if; wp; auto; smt.
+  proc.
+  if; auto; smt.
 qed.
+
+(*
+However, since this program is quite simple we can actually make the proof
+shorter. We can also make the logic more abstract like so. Please note how we do this,
+since we will use it again.
+*)
+
+lemma flipper_correct (x0:bool):
+  hoare [ Flip.flipper : x = x0  ==> res <> x0 ].
+proof.
+  proc.
+  auto.
+  smt.
+qed.
+
+(*
+This is how proofs are polished and made shorter. We first write a verbose proof,
+then keep experimenting to find shorter and more elegant proofs.
+*)
 
 (*
 Let us define the exponentiation function that we saw in the text.
 *)
 
 module Exp = {
-proc exp (x n: int) : int = 
+  proc exp (x n: int) : int = 
   {
-  var r, i;
-  r <- 1;
-  i <- 0;
-  while (i < n){
+    var r, i;
+    r <- 1;
+    i <- 0;
+    while (i < n){
     r <- r*x;
     i <- i+1;
-  }
-  return r;
+    }
+        return r;
   }
 }.
 
@@ -330,20 +356,20 @@ proc exp (x n: int) : int =
 (*
 Let us formulate a hoare triple that says that exp(10, 2) = 100.
 The triple would be:
-{x = 10 /\ n=2} Flip_Exp.exp {res=100}
+{x = 10 /\ n=2} Exp.exp {res=100}
 and in EC, we would write it like so.
 *)
 
 lemma ten_to_two: hoare [ Exp.exp : x = 10 /\ n = 2 ==> res = 100 ].
 proof.
-proc.
+  proc.
 
 (*
 When working with tuples EC has the syntax of using backticks (`) to address the tuple.
 So (x,n).`1 refers to x.
 Often the output from EC can be quite hard to read, simplifying it can sometimes help.
 *)
-simplify.
+  simplify.
 
 (*
 Now we want to reason with a while loop in the program.
@@ -352,20 +378,20 @@ To get a feel of how the program runs we can step through a loop
 using the "unroll" tactic. We need to mention the line number of the
 program where we want the tactic to apply. Like so:
 *)
-unroll 3.
-unroll 4.
+  unroll 3.
+  unroll 4.
 
 (*
 At this point, we now have two if conditions which we know will hold,
 and a while loop for which the condition will not hold. To reason with
 loops and conditions like these EC provides two tactics
 rcondt, and rcondf.
-You can read them as remove condition with a true/false assignment.
+You can read them as: remove condition with a true/false assignment.
 Since here we know that the condition will evaluate to false, we will use the
 rcondf version.
 *)
 
-rcondf 5.
+  rcondf 5.
 (*
 Notice how the postcondition now requires the condition for the while loop
 to be false.
@@ -377,19 +403,19 @@ Here, since the program is quite simple, the smt solvers can complete the proof.
 However, pay attention to how hard it gets to read the output
 after the application of wp, and skip.
 *)
-wp.
-skip.
-smt.
+  wp.
+  skip.
+  smt.
 
 (*
 Goal #2:
-Now again, we have two if conditions, that we need to work with.
-The proof proceeds that same as before. wp is strong enough to reason with it.
+Again, we have two "if" conditions, that we need to work with.
+The proof proceeds the same way as before. wp is strong enough to reason with it.
 *)
 
-wp.
-skip.
-smt.
+  wp.
+  skip.
+  smt.
 qed.
 
 (*
@@ -399,16 +425,16 @@ So let us do that, to clean up the previous proof.
 
 lemma ten_to_two_clean: hoare [ Exp.exp : x = 10 /\ n = 2 ==> res = 100 ].
 proof.
-proc.
-unroll 3.
-unroll 4.
-rcondf 5; wp; skip; smt.
+  proc.
+  unroll 3.
+  unroll 4.
+  rcondf 5; auto.
 qed.
 
 (*
 For a loop that unrolls twice it is easy to do it manually.
 However, this strategy wouldn't work for a different scenario.
-For instance inorder to prove that the program works correctly we need to prove
+For instance in order to prove that the program works correctly we need to prove
 the correctness for every number, so we would prefer to work with abstract symbols
 and not concrete numbers like 10^2.
 In order to work up to it, let us prove that 2^10 works as intended.
@@ -420,9 +446,9 @@ For instance, take a look at the following lemma, and our attempt to prove it.
 
 lemma twototen: 2^10 = 1024.
 proof.
-trivial.
-simplify.
-auto.
+  trivial.
+  simplify.
+  auto.
 (*
 None of those tactics do anything 
 Even smt doesn't work.
@@ -430,16 +456,16 @@ You can try it as well.
 Again, the point here is that, these kinds of tasks aren't what EC was
 built for.
 For the time being we will admit this lemma, since we know that
-2^10 is infact 1024.
+2^10 is in fact 1024.
 We need this to prove the next few lemmas relating to hoare triples.
 *)
-admit.
+  admit.
 qed.
 
 lemma two_to_ten: hoare [ Exp.exp : x = 2 /\ n = 10 ==> res = 1024 ].
 proof.
-proc.
-simplify.
+  proc.
+  simplify.
 (* 
 To get rid of the loop, we need to understand the behavior of the program, and 
 figure out a loop invariant. This is because we have the tactic:
@@ -452,7 +478,7 @@ Which is r = 1024. Let us try to see how we can get there.
 Let us start small and say that we know that (x = 2) holds before
 and after the execution of the loop.
 *)
-while ( x = 2 ).
+  while ( x = 2 ).
 (*
 Observe how the goals have changed.
 In Goal #1, the invariant that we propose is in both the pre and post conditions.
@@ -460,8 +486,8 @@ The burden of the proof still lies on us however. Of course, since we don't
 change x, this should hold quite naturally. And we can discharge Goal #1 quite
 easily.
 *)
-wp.
-auto.
+  wp.
+  auto.
 
 (*
 Now let us pay attention to what we have left.
@@ -479,7 +505,7 @@ abort.
 
 lemma two_to_ten: hoare [ Exp.exp : x = 2 /\ n = 10 ==> res = 1024 ].
 proof.
-proc.
+  proc.
 
 (*
 As an additional invariant, we know that the loop runs until our
@@ -487,14 +513,14 @@ loop variable i goes from 0, to n. So as an invariant, we have
 0 <= i <= n, and the control exits the loop when ! (i < n).
 Let us try to see what happens if we add this in.
 *)
-while ( x = 2  /\ 0 <= i <= n).
-wp.
-auto.
-smt.
+  while ( x = 2  /\ 0 <= i <= n).
+  wp.
+  auto.
+  smt.
 
 (*
 Let us read what the goal says now.
-Again it says sopmething about r0 without bounding what r0 can be.
+Again it says something about r0 without bounding what r0 can be.
 This attempt will also fail.
 So we need to understand what happens to the variable r0, at the end of every
 iteration of the loop.
@@ -504,7 +530,7 @@ abort.
 
 lemma two_to_ten: hoare [ Exp.exp : x = 2 /\ n = 10 ==> res = 1024 ].
 proof.
-proc.
+  proc.
 (*
 We know that after every iteration, the variable r is multiplied by x.
 So in this case, since we have x = 2, essentially at the end of
@@ -512,31 +538,31 @@ i iterations of the loop we have the fact that r = 2^i.
 This is an invariant, and it binds r to the variables that are passed to the
 loop. Let us see if this attempt works.
 *)
-while (x = 2  /\ 0 <= i <= n /\  r = 2^i).
+  while (x = 2  /\ 0 <= i <= n /\  r = 2^i).
 
 (*
 Again, Goal #1 will go through quite easily.
 *)
-wp.
-skip.
-smt.
+  wp.
+  skip.
+  smt.
 
 (* Goal #2 *)
-wp.
-simplify.
-auto.
+  wp.
+  simplify.
+  auto.
 (*
 When the goal is too complicated to read, we can apply the tactic "progress".
 "progress" breaks the goals into simpler ones by repeatedly applying the
-"split", "subst" and "move =>" tactics and trying to solve the trivial goals.
+"split", "subst" and "move =>" tactics and trying to solve trivial goals automatically.
 *)
-progress.
+  progress.
 
 (* 2 ^ 0 = 1 *)
-smt.
+  smt.
 
 (* 2^10 = 1024 *)
-smt.
+  smt.
 qed.
 
 (*
@@ -554,13 +580,13 @@ modifies the value of x. So let us get rid of that condition as well.
 
 lemma two_to_ten_clean: hoare [ Exp.exp : x = 2 /\ n = 10 ==> res = 1024 ].
 proof.
-proc.
-simplify.
-while ( r = x^i /\ 0 <= i <= n); wp; skip; smt.
+  proc.
+  simplify.
+  while ( r = x^i /\ 0 <= i <= n); auto; smt.
 qed.
 
 (*
-Now the proof seems so inocous and straighforward.
+Now the proof seems so innocuous and straightforward.
 However, it is important to understand that these proofs and
 figuring out the loop invariants always take a few tries, and
 sometimes crafting the right invariant can be an art by itself.
@@ -574,41 +600,43 @@ Now let us try to work with abstract symbols, the stuff that EC
 was actually built for. Here we mentioned in the text, in order to claim
 that the exp function is correct, we need to have the condition that
 the exponent that we provide is greater than zero.
-We use x0, and n0, inorder to differentiate from the program variables.
+We use x0, and n0, in order to differentiate from the program variables.
 *)
-lemma x0_to_n0_correct x0 n0: 
+lemma x0_to_n0_correct (x0 n0: int): 
   0 <= n0 =>
   hoare [ Exp.exp : x = x0 /\ n = n0 ==> res = x0 ^ n0 ].
 proof.
-move => Hn0.
-proc.
-while (r=x^i /\ 0 <= i <= n).
-wp.
-skip.
-smt.
+  move => Hn0.
+  proc.
+  while (r=x^i /\ 0 <= i <= n).
+  wp.
+  skip.
+  smt.
 
-wp.
-skip.
-progress.
-smt.
-smt.
+  wp.
+  skip.
+  progress.
+  smt.
+  smt.
 qed.
 
 
 (*
 Again, we can clean up the proof like so:
+Notice that we omit the type declaration of x0 and n0,
+since EasyCrypt can figure it out by itself.
 *)
 lemma x0_to_n0_correct_clean x0 n0: 
   0 <= n0 =>
   hoare [ Exp.exp : x = x0 /\ n = n0 ==> res = x0 ^ n0 ].
 proof.
-move => Hn0.
-proc.
-while (r=x^i /\ 0 <= i <= n); wp; skip; smt.
+  move => Hn0.
+  proc.
+  while (r=x^i /\ 0 <= i <= n); auto; smt.
 qed.
 
 (*
 As an exercise, you can do similar proofs for the following mathematical functions:
-1. A program to decide the if a given number is even or odd.
-2. A program to compute the factorial of given number.
+1. A program to decide if a given number is even or odd.
+2. A program to compute the factorial of a given number.
 *)
