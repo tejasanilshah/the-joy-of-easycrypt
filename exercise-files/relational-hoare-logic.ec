@@ -36,20 +36,24 @@ Notice the syntax of how it is done. (int*int)
 On paper we define hoare quadruples like so:
 {P} C1 ~ C2 {Q}
 While in EC, we use the following syntax to say the same:
-equiv [C1 ~ C2 := P ==> Q]
+equiv [C1 ~ C2 : P ==> Q]
 As with Hoare triples in EC, we access the results of
-both the programs using the "res" keyword. 
-The numbers in the curly braces are the identifiers.
-So res{1} should be read as result from program 1.
+both the programs using the "res" keyword.
 Let us first prove that swap1 is equivalent to itself.
 *)
+
 lemma swap1_equiv_swap1:
 equiv [Jumbled.swap1 ~  Jumbled.swap1 : 
       x{1}=x{2} /\ y{1}=y{2} ==> res{1} = res{2}].
+(*
+The numbers in the curly braces are identifiers
+for programs. So res{1} should be read as result 
+from program 1, and res{2} is the result from program 2.
+*)
 proof.
-proc.
-simplify.
-auto.
+  proc.
+  simplify.
+  auto.
 qed.
 
 (*
@@ -63,7 +67,7 @@ lemma swaps_equivalent:
 equiv [Jumbled.swap1 ~  Jumbled.swap2 : ={x, y} ==> ={res} ].
 proof.
 proc.
-simplify.
+  simplify.
 (*
 Now we have different programs, and the way we work with them is by 
 using similar tactics that we used for HL.
@@ -72,7 +76,7 @@ to the tactics for them to target specific sides and lines of code.
 For instance, for the sake of a demonstration let us use the wp tactic
 in an asymmetric way.
 *)
-wp 2 3.
+  wp 2 3.
 (*
 The tactic "wp n1 n2" will try to consume code
 up to the n1-th line from the left program,
@@ -83,31 +87,45 @@ and leaves the right program untouched.
 Try C-c C-u to undo and then C-c C-n
 to redo and notice how things change.
 *)
-wp 2 2.
-wp 0 1.
-wp 0 0.
-skip.
-trivial.
+  wp 2 2.
+  wp 0 1.
+  wp 0 0.
+  skip.
+  trivial.
 qed.
 
 (*
-To be fair, the equivalence of swap1 and swap2
-is quite easy to prove, and we used a simple example
-to illustrate how to use the wp tactic.
-These tactics can be replaced with "auto".
-So let us clean up the proof using auto.
+Let us clean up the proof since we will never use
+wp in the way we did above. In general we will rely
+on EC to automatically work with whatever it can.
+*)
+
+lemma swaps_equivalent2:
+equiv [Jumbled.swap1 ~  Jumbled.swap2 : ={x, y} ==> ={res} ].
+proof.
+  proc.
+  wp.
+  skip.
+  simplify.
+  trivial.
+qed.
+
+(*
+Now that we see the complete proof relies only on
+"wp, skip, and trivial" tactics, we can replace them with "auto".
+Let us clean up the proof further with auto.
 *)
 
 lemma swaps_equivalent_clean:
 equiv [Jumbled.swap1 ~  Jumbled.swap2 : ={x, y} ==> ={res}  ].
 proof.
-proc.
-auto.
+  proc.
+  auto.
 qed.
 
 (*
 Now let us take a small detour here and build on the the module types
-that we breifly introduced in the execise file of HL.
+that we briefly introduced in the exercise file of HL.
 When working with cryptography, we generally don't know about the
 inner workings of an adversary or an oracle.
 In order to model these in EC we have the module types.
@@ -119,12 +137,12 @@ module type Adv = {
 }.
 
 (*
-By defining the module type Adv, we are instructing EC, that any
+By defining the module type Adv, we are instructing EC that any
 concrete module which is of the Adv type has to, at the very least,
 implement eavesdrop_one, and eavesdrop_two procedures.
 What is interesting is that EC allows us to reason with the
 abstract module types as well. For example let us define a module
-which expects an Adv as input, and has a procedure called
+which expects an Adv as input, and has a procedure
 *)
 
 module Abstract_game(A:Adv) = {
@@ -153,15 +171,15 @@ lemma eavesdrop_reflex(A<:Adv):
 equiv [Abstract_game(A).one ~ Abstract_game(A).one :
       ={glob A} ==> res{1} = res{2} ].
 proof.
-proc.
-call (_: true).
+  proc.
+  call (_: true).
 (*
 the call tactic does a few complicated things under the hood,
 but at this point of time, what we can take away is that 
 if there is a call to the same abstract function on both
 sides, call (_: true), knocks them both off.
 *)
-auto.
+  auto.
 qed.
 
 (*
@@ -188,11 +206,11 @@ module Games = {
 lemma games_quadruple (A<:Adv):
     equiv [Games.t ~ Games.f : ={glob A} ==> res{1} <> res{2}].
 proof.
-proc.
-inline *.
-wp.
-simplify.
-trivial.
+  proc.
+  inline *.
+  wp.
+  simplify.
+  trivial.
 (* auto can replace wp. simplify. trivial  *)
 qed.
 
@@ -244,7 +262,7 @@ module Compiler = {
 
 (*
 Now let us try to prove the fact that
-the behaivour of both the programs is equivalent.
+the behaviour of both the programs is equivalent.
 At this point there can be two possibilities:
 1. !(y < z) => (y = z) \/ (z < y):
 In this case neither the while loop, nor the if condition are satisfied.
@@ -257,7 +275,7 @@ The while loop and the if condition executed at least once.
 In this case the variables are modified.
 
 So in order to prove that the optimization is indeed correct, we can
-break our proof into these two cases, prove them independantly
+break our proof into these two cases, prove them independently
 and then put them back together.
 
 An important point to note here is that, this proof took multiple attempts
@@ -271,15 +289,15 @@ lemma optimization_correct_a:
 equiv [Compiler.unoptimized ~ Compiler.optimized:
       ={x, y ,z} /\ (z{1}=y{1} \/ z{1}<y{1}) ==> ={res}  ].
 proof.
-proc.
-simplify.
+  proc.
+  simplify.
 (*
 At this point we introduce the seq tactic.
 The seq tactic does the following:
 
-         {P} A1; A2; A3 ~ B1; B2; B3 {Q}
-  ----------------------------------------------- seq 1 2: ({R})
-   {P} A1; ~ B1; B2; {R}  {R} A2; A3; ~ B3; {Q}
+          {P} A1; A2; A3 ~ B1; B2; B3 {Q}
+  ----------------------------------------------- seq 1 2: (R)
+   {P} A1; ~ B1; B2; {R} /\ {R} A2; A3; ~ B3; {Q}
 
 In general, the idea behind using the seq tactic is to
 break the programs into manageable chunks, and deal with them
@@ -287,14 +305,15 @@ separately.
 In our program, we have an if condition, that
 we can effectively deal with and then work with the while
 conditions.
-In this part of the proof, we know that the code inside the
-conditions is not executed. Hence we pass precondition as the {R}
-and we knock off the "if" from the right program.
+
+In this part of the proof, we know that the code inside the conditions
+is not executed. Hence know that
+R will simply have the variables unchanged
 *)
-seq 0 1: ( ={x, y ,z} /\ (z{1}=y{1} \/ z{1}<y{1})  ).
+  seq 0 1: ( ={x, y ,z} /\ (z{1}=y{1} \/ z{1}<y{1}) ).
 (* Pause and see how the goal changed and now we have two goals to prove *)
-auto.
-smt().
+  auto.
+  smt().
 (*
 Now we know that neither of the while conditions
 hold. So like we did earlier, we will use the rcondf to work with them.
@@ -305,14 +324,14 @@ So in our case !(y < z).
 When working with RHL, we have to use program identifiers, so that
 EC can target the correct side and lines of code.
 *)
-rcondf {1} 1.
-auto.
-smt().
+  rcondf {1} 1.
+  auto.
+  smt().
 (* Similarly, we work with the right program. *)
-rcondf {2} 1.
-auto.
-smt().
-auto.
+  rcondf {2} 1.
+  auto.
+  smt().
+  auto.
 qed.
 
 (*
@@ -343,31 +362,30 @@ lemma optimization_correct_b:
 equiv [Compiler.unoptimized ~ Compiler.optimized:
       ={x, y ,z} /\ y{1}<z{1} ==> ={res}  ].
 proof.
-proc.
+  proc.
 (*
 As we did earlier, we will get rid of the if,
 but this time we know that it will be executed,
 hence we have x{2} = z{2} + 1 in the condition.
 *)
-seq 0 1: (={y,z} /\ y{1}<z{1} /\ x{2} = z{2} + 1).
-simplify.
-auto.
-while (={y,z} /\ x{2} = z{2} + 1 /\ (y{1}<z{1} \/ x{1} = z{1} + 1)).
-auto.
-auto.
-smt().
+  seq 0 1: (={y,z} /\ y{1}<z{1} /\ x{2} = z{2} + 1).
+  simplify.
+  auto.
+  while (={y,z} /\ x{2} = z{2} + 1 /\ (y{1}<z{1} \/ x{1} = z{1} + 1)).
+  auto.
+  auto.
+  smt().
 qed.
 
 (*
 Now let us put these two things together.
-We will be 
 *)
 
 lemma optimization_correct:
 equiv [Compiler.unoptimized ~ Compiler.optimized:
       ={x, y ,z} ==> ={res}  ].
 proof.
-proc*.
+  proc*.
 (*
 Here we introduce "proc*",
 proc* modifies the goal in a way similar to "proc", but
@@ -376,18 +394,18 @@ With proc, we usually lose this connection to the procedures.
 *)
 
 (*
-Now we split on the boolean expression of the while condition.
+Now we split on the boolean expression of the while loop.
 Although we can't see it in the goal explicitly, we know this
 is what we need to do since we put together two parts earlier.
 *)
-case (y{1}<z{1}).
+  case (y{1}<z{1}).
 (*
 Notice how the goals changed, and how these are the exactly our
 previous two parts.
 *)
-call optimization_correct_b. simplify. auto.
-call optimization_correct_a. simplify. auto.
-smt().
+    call optimization_correct_b. simplify. auto.
+    call optimization_correct_a. simplify. auto.
+  smt().
 qed.
 
 (*
