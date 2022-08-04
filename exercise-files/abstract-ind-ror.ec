@@ -1,7 +1,6 @@
 (* 
-Welcome to ProofGeneral, the frontend that we use to
-work with EasyCrypt.
-ProofGeneral runs on top of Emacs,
+Welcome to ProofGeneral, the front-end that we use to
+work with EasyCrypt. ProofGeneral runs on top of Emacs,
 so most of keybindings of Emacs work as expected.
 
 In this file, we go through an illustrative example of
