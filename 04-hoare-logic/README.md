@@ -13,41 +13,32 @@ exp(x, n):
 
 When presented with a program like this, our objective is to figure out if the program behaves correctly. At first glance, this program seems correct. However, a glaring mistake here is that the program will always return $1$ as a result if we pass any negative integer as the second argument. That isn't the behaviour we expect from an exponentiation function. So saying that the program is correct would be a false claim. So to make claims about the behaviour of the program, mathematically, we would say something like:
 
-$$ \text{Given } 
-    \underbrace{ x \in \mathbb{Z}, n \in \mathbb{Z} \text{ \& } n \ge 0 }_\text{pre-condition}, \,\underbrace{exp(x, n)}_\text{program}
-    \text{ returns}
-    \underbrace{r = x ^{n}}_\text{post-condition} $$
+$$ \text{Given } \underbrace{ x \in \mathbb{Z}, n \in \mathbb{Z} \text{ and } n \ge 0 }_\text{pre-condition}, \,\underbrace{exp(x, n)}_\text{program} \text{ returns} \underbrace{r = x ^{n}}_\text{post-condition} $$
 
 # The Hoare triple
 As marked in the statement above, claims that we make generally have three distinct parts: preconditions, the program and postconditions. Hoare logic formalises these three parts and introduces them as a \textbf{Hoare triple}.
 
 A Hoare triple is denoted like so:
-$$  \{P\}
-    \,C\,
-    \{Q\}
-$$
 
-Here $P \text{ and } Q$, are conditions on the program variables used in $C$. Conditions on program variables are written using standard mathematical notations together with logical operators like $\wedge$ (‘and’), $\vee$ (‘or’), $\neg$ (‘not’) and $\implies$ (‘implies’). Additionally, we have special conditions $true$ or $T$ which always holds, and $false$ or $F$ which never holds.
+$$  {P} C {Q} $$
+
+Here $ P \text{ and } Q $, are conditions on the program variables used in $C$. Conditions on program variables are written using standard mathematical notations together with logical operators like $\wedge$ (‘and’), $\vee$ (‘or’), $\neg$ (‘not’) and $\implies$ (‘implies’). Additionally, we have special conditions $true$ or $T$ which always holds, and $false$ or $F$ which never holds.
 
 $C$ is a program in some specified language.
 
-We say that a Hoare triple, $ \{P\} \,C\, \{Q\}$, holds if whenever $C$ is executed from a state satisfying $P$ and if the execution of $C$ terminates, then the state in which $C$’s execution terminates satisfies $Q$. We will limit our discussion to programs which terminate.
+We say that a Hoare triple, $ {P} C {Q}$, holds if whenever $C$ is executed from a state satisfying $P$ and if the execution of $C$ terminates, then the state in which $C$’s execution terminates satisfies $Q$. We will limit our discussion to programs which terminate.
 
 ## Examples
-1. $\{x = n\} \, x:= x+1 \, \{x = n+1\}$ holds. ($:=$ is the assignment operator)
-2. $  
-    \{x = n\}
-    \, x:= x+1 \,
-    \{x = n+ 2\}
-$ doesn't hold.
-3. $ \{true\} \,C\, \{Q\}$ is a triple in which the precondition always holds. So we'd say that this triple holds for every $C$ that satisfies the postcondition $Q$.
-4. $ \{P\} \,C\, \{true\}$, similarly, this triple holds for every precondition $P$ that is satisfied, and every program $C$.
-5. $ \{false\} \,C\, \{Q\}$, is an interesting triple which, according to our definitions, doesn't hold since false is a statement that never holds. However, this is a slightly special case, as we will see in EasyCrypt.
+1. ${x = n} x:= x+1 {x = n+1}$ holds. ($:=$ is the assignment operator)
+2. ${x = n} \, x:= x+1 \, {x = n+ 2}$ doesn't hold.
+3. $ {true} \,C\, {Q}$ is a triple in which the precondition always holds. So we'd say that this triple holds for every $C$ that satisfies the postcondition $Q$.
+4. $ {P} \,C\, {true}$, similarly, this triple holds for every precondition $P$ that is satisfied, and every program $C$.
+5. $ {false} \,C\, {Q}$, is an interesting triple which, according to our definitions, doesn't hold since false is a statement that never holds. However, this is a slightly special case, as we will see in EasyCrypt.
 
 ## Exercises
-1. Does $ \{x=1\} \, x:=x+2\, \{x=3\}$ hold?
-2. How about $ \{true\} \,\, exp(x,a)\,\, \{r=x^a\}$? Why?
-3. What about $ \{2=3\} \,x:=1\, \{x=1\}$?
+1. Does $ {x=1} \, x:=x+2\, {x=3}$ hold?
+2. How about $ {true} \,\, exp(x,a)\,\, {r=x^a}$? Why?
+3. What about $ {2=3} \,x:=1\, {x=1}$?
 
 # Strength of statements
 Informally, if a statement can be deduced from another, then the statement that was deduced is a weaker statement.
@@ -55,7 +46,8 @@ Informally, if a statement can be deduced from another, then the statement that 
 Mathematically if we have $P \implies Q$, we say that $P$ is a stronger statement than $Q$.
 
 For example,
-$$ x = 5 \implies x \ge 5$$ $$ x = 5 \text{ is a stronger statement than } x \ge 5$$
+$$ x = 5 \implies x \ge 5$$
+$$ x = 5 \text{ is a stronger statement than } x \ge 5$$
 
 As discussed earlier, we have two special statements, $true$, which always holds, and $false$, which never holds. These are the weakest and the strongest statements there are, respectively.
 
@@ -67,69 +59,66 @@ Similarly, $false$ never holds. So, no statement can imply false; hence, it is t
 So far, we looked at Hoare triples for simple statements, these can be thought of \enquote{programs} with a single instruction as well. However, we need to be able to work with multiple statements and more complex statements. We achieve this by formalizing a set of axioms that we believe to be true, and then we combine these axioms to make claims about complex statements. We often visualize these series of steps in which we put the axioms together into \textit{schemas} or \textit{proof trees}.
 
 For example: For a statement $S$, we say it is or provable by denoting it with a turnstile ($\vdash$) symbol like so $\vdash S$, and its proof can be denoted by:
-$$
-\dfrac{\vdash S_1, \vdash S_2, \dots ,\vdash S_n}{\vdash S}
-$$
+$$ \dfrac{\vdash S_1, \vdash S_2, \dots ,\vdash S_n}{\vdash S} $$
+
 This says the conclusion $S$ may be deduced from the $S_1, \dots, S_n$ which are the hypotheses of the rule. The hypotheses can either all be theorems or axioms of Hoare Logic or mathematics.
 
 Now, we will take a look at some of the axioms of Hoare logic  with examples to give you a flavour of how they work. One of the reasons we cover these is because these axioms form the basis for the tactics we use in Hoare logic in EasyCrypt. Of course, the main idea is to familiarize the reader with the basics since the main goal is for the machine to take care of the specifics.
 
 # Axioms of Hoare logic
 
-1. *Assignment*: $$ \vdash \{P[E/V ]\} \, V :=E \,\{P\} $$
+1. *Assignment*:
+$$ \vdash {P[E/V ]} \, V :=E \,{P} $$
+
 Where $V$ is any variable, $E$ is any expression, $P$ is any statement, and the notation $P[E/V]$ denotes the result of substituting the term $E$ for all occurrences of the variable $V$ in the statement $P$.
 
-2. *Precondition strengthening*: When we have a Hoare triple $\{P'\}\, C \,\{Q\}$, where $P'$ is a statement that follows from a stronger statement, $P$. Then we can say,
-$$ \dfrac{\vdash P \implies P', \vdash \{P'\}\, C \,\{Q\}}{\vdash \{P\} \, C \, \{Q\}} $$
+2. *Precondition strengthening*: When we have a Hoare triple ${P'}\ C \ {Q}$, where $P'$ is a statement that follows from a stronger statement, $P$. Then we can say,
+$$ \dfrac{\vdash P \implies P', \vdash {P'}\ C \ {Q}}{\vdash {P} \ C \ {Q}} $$
+
+Example:  Let
+
+$$C = [x:=x+2]  $$
+$$P = {x = 5}$$
+$$P' = {x \ge 5} \text{ , and}$$ 
+$$Q = {x \ge 7}$$
+Using the precondition strengthening axiom we have,
+
+$$ \dfrac{\vdash x = 5  \implies x \ge 5,\, \vdash {x \ge 5}\, x:=x+2 \,{x \ge 7}} {\vdash {x=5} \, x:= x + 2 \, {x \ge 7}} $$
+
+3. *Postcondition weakening*: Similarly, when we have a Hoare triple ${P}\, C \,{Q'}$, where $Q'$ is a strong statement, and if $Q$ follows from $Q'$. Then we can say,
+
+$$ \dfrac{\vdash {P}\, C \,{Q'}, \, \vdash Q' \implies Q}{ \vdash {P} \, C \, {Q}} $$
+
 Example:  Let
 $$C = [x:=x+2]  $$
-$$P = \{x = 5\}$$
-$$P' = \{x \ge 5\} \text{ , and}$$ 
-$$Q = \{x \ge 7\}$$
-Using the precondition strengthening axiom we have, 
-$$ \dfrac{\vdash x = 5  \implies x \ge 5,\, \vdash \{x \ge 5\}\, x:=x+2 \,\{x \ge 7\}} {\vdash \{x=5\} \, x:= x + 2 \, \{x \ge 7\}} $$
+$$P = {x = 5}$$
+$$Q' = {x = 7} \text{ , and}$$ 
+$$Q = {x \ge 7}$$
 
-3. *Postcondition weakening*:
-
-Similarly, when we have a Hoare triple $\{P\}\, C \,\{Q'\}$, where $Q'$ is a strong statement, and if $Q$ follows from $Q'$. Then we can say,
-$$ \dfrac{\vdash \{P\}\, C \,\{Q'\}, \, \vdash Q' \implies Q}{ \vdash \{P\} \, C \, \{Q\}} $$
-Example:  Let
-$$C = [x:=x+2]  $$
-$$P = \{x = 5\}$$
-$$Q' = \{x = 7\} \text{ , and}$$ 
-$$Q = \{x \ge 7\}$$
 With the postcondition weakening axiom, we have,  
-$$ \dfrac{\vdash \{x = 5\}\, x:=x+2 \,\{x =7\}, \, \vdash x = 7  \implies x \ge 7 } {\vdash \{x=5\} \, x:= x + 2 \, \{x \ge 7\}} $$
+
+$$ \dfrac{\vdash {x = 5}\, x:=x+2 \,{x =7}, \, \vdash x = 7  \implies x \ge 7 } {\vdash {x=5} \, x:= x + 2 \, {x \ge 7}} $$
 
 Together the precondition strengthening and postcondition weakening axioms are known as the \textbf{consequence rules}.
 
-4. *Sequencing*:
-For two programs $C_1, C_2$, we have the following:
-$$
-\dfrac{
-\vdash \{P\}\, C_1 \,\{Q'\}, \,
-\vdash \{Q'\}\, C_2 \,\{Q\},
-}
-{
-\vdash \{P\}\, C_1;C_2 \,\{Q\}
-}
-$$
+4. *Sequencing*: For two programs $C_1, C_2$, we have
+
+$$ \dfrac{ \vdash {P}\, C_1 \,{Q'}, \, \vdash {Q'}\, C_2 \,{Q}, }{ \vdash P}\, C_1;C_2 \,{Q} } $$
+
 Example: Let
+
 $$C_1 = [x:=x+2] $$
 $$C_2 = [x:=x*2] $$
-$$P = \{x = 5\}$$
-$$Q' = \{x = 7\}  \text{ , and}$$ 
-$$Q = \{x = 14\}$$
+$$P = {x = 5}$$
+$$Q' = {x = 7}  \text{ , and}$$ 
+$$Q = {x = 14}$$
 Using the sequencing axiom, we have,
-$$ \dfrac{
-\vdash \{x = 5\} \, x:=x+2 \, \{x =7\}, \,
-\vdash \{x = 7\}\, x:=x*2 \,\{x =14\}
-}
-{\vdash \{x=5\} \, x:= x + 2, x:= x*2 \, \{x =14\}} $$
+
+$$ \dfrac{ \vdash {x = 5} \, x:=x+2 \, {x =7}, \, \vdash {x = 7}\, x:=x*2  ,{x =14} } {\vdash {x=5} \, x:= x + 2, x:= x*2 \, {x =14}} $$
 
 We go through these examples to get a sense of what formal proof trees look like and the theory that formal verification is based on. The proof trees that we've used are already simplified to exclude the assignment axiom and steps that we as humans can easily understand and gloss over. Proof trees get quite large and unwieldy as soon as we do anything non-trivial. This is exactly where formal verification tools come into the picture. So, let us now switch to EasyCrypt and work with Hoare triples.
 
-Note that Hoare logic by itself is often referred to as classical Hoare logic. It has been studied quite extensively, and there are plenty of good textbooks~\cite{logic_in_cs,foundations_of_computing} that one can refer to for mathematical rigour and completeness. The objective here is to give the reader an intuitive understanding of the math, and enough working knowledge required to work with EasyCrypt.
+Note that Hoare logic by itself is often referred to as classical Hoare logic. It has been studied quite extensively, and there are plenty of good textbooks ([Textbook 1](https://dl.acm.org/doi/10.5555/975331), [Texbook 2](https://mitpress.mit.edu/books/foundations-programming-languages)) that one can refer to for mathematical rigour and completeness. The objective here is to give the reader an intuitive understanding of the math, and enough working knowledge required to work with EasyCrypt.
 
 
 # HL in EasyCrypt
@@ -144,9 +133,9 @@ module Func1 = {
   proc add_2 (x: int) : int = { x <- x + 2; return x; }
 }.
 ```
-A Hoare triple denoted by $ \{P\} \,C\, \{Q\}$ in theory is expressed as `hoare [C : P ==> Q ]` in EasyCrypt, with the usual definitions. Additionally, the return value of the program, $C$, is stored in a special keyword called `res`.
+A Hoare triple denoted by $ {P} \,C\, {Q}$ in theory is expressed as `hoare [C : P ==> Q ]` in EasyCrypt, with the usual definitions. Additionally, the return value of the program, $C$, is stored in a special keyword called `res`.
 
-So the triple $ \{x=1\}\texttt{ Func1.add\_1 }\{x=2\}$ would be expressed in EasyCrypt like so:
+So the triple $ {x=1}\texttt{ Func1.add\_1 }{x=2}$ would be expressed in EasyCrypt like so:
 ```
 lemma triple1: hoare [ Func1.add_1 : x = 1 ==> res = 2].
 ```
@@ -164,7 +153,9 @@ post = res = 2
 We need to start stepping through the procedure or program that is being reasoned about and change the preconditions and postconditions according to axioms and lemmas that we have.
 
 To make progress here, we first need to tell EasyCrypt what \texttt{Func1.add\_1} is. The way to do that is by using the `proc` tactic. It simply fills in the definitions of the procedures that we define. Since \texttt{Func1.add\_1} is made up of only a return statement, `proc` replaces `res` with the return value. This leaves us with an empty program. This is what we want to work towards; using different tactics we would like to change the preconditions and postconditions depending on what the programs that we are reasoning with do. Once we have consumed all the program statements, we can transform the goal from a HL goal to a goal in ambient logic using the `skip` tactic. `skip` does the following:
-$$ \dfrac{\{P\} \;\;\;\;\; \{Q\}}{ P \implies Q}\texttt{skip} $$
+
+$$ \dfrac{{P} \;\;\;\;\; {Q}}{ P \implies Q}\texttt{skip} $$
+
 This puts us back in the familiar territory of ambient logic, and we can use all the tactics that we learnt in \mintinline{bash}{ambient-logic.ec}. The only difference is that transitioning a goal from Hoare logic to ambient logic introduces some qualifiers about the memory that the program works on. Hence, we need to handle those as well. In this example, the goal after evaluating `skip` will simply read: `forall &hr, x{hr} = 1 => x{hr} + 1 = 2`. The proof for which follows pretty trivially. The only difference is that we need to move the memory into the assumption by prepending the \& character in the `move => ` tactic.
 
 So the full proof for this simple example looks like so:
@@ -197,24 +188,17 @@ pre = x = 1
 
 post = x = 3
 ```
-When we are faced with $\{P\} S1; S2; S3; \{Q\}$ with the usual definitions, applying the `wp` tactic consumes as many ordinary statements as possible from the end. Then it replaces the postcondition $Q$, with a precondition $R$. $R$ is chosen such that it holds in conjunction with the consumed statements and the original postcondition and it is as weak as possible (*w*eakest *p*recondition). It is easier to visualize this in a proof tree. 
+When we are faced with ${P} S1; S2; S3; {Q}$ with the usual definitions, applying the `wp` tactic consumes as many ordinary statements as possible from the end. Then it replaces the postcondition $Q$, with a precondition $R$. $R$ is chosen such that it holds in conjunction with the consumed statements and the original postcondition and it is as weak as possible (*w*eakest *p*recondition). It is easier to visualize this in a proof tree. 
 
-For instance, when we have $\{P\} S1; S2; S3; \{Q\}$ and $S2; S3;$ are statements that can be dealt with some axioms or logical deductions, then `wp` does the following:
-$$
-\dfrac{
-    \dfrac{ \{P\} S1; S2; S3; \{Q\}}
-    {\{P\} S1; \{R\} /\textbackslash \{R\} S2; S3; \{Q\}}\texttt{wp}
-}
-{\{P\} S1; \{R\}}
-$$
-The triple $\{R\} S2; S3; \{Q\}$ is guaranteed to hold, and hence the goal transforms to just $\{P\} S1; \{R\}$.
+For instance, when we have ${P} S1; S2; S3; {Q}$ and $S2; S3;$ are statements that can be dealt with some axioms or logical deductions, then `wp` does the following:
+
+$$ \dfrac{     \dfrac{ {P} S1; S2; S3; {Q}}     {{P} S1; {R} /\textbackslash  R} S2; S3; {Q}}\texttt{wp} } {{P} S1; {R}} $$
+
+The triple ${R} S2; S3; {Q}$ is guaranteed to hold, and hence the goal transforms to just ${P} S1; {R}$.
 In our context, we use `wp`, and `skip` to get the following proof tree:
-$$
-\dfrac{
-\dfrac{\{x = 1\} \;\; x:= x+2 \;\;\{x=3\}}{\{x = 1\}  \;\;\;\;\;\;   \{x+2=3\}}wp
-}
-{x = 1  \implies x+2=3}skip
-$$
+
+$$ \dfrac{ \dfrac{{x = 1} \;\; x:= x+2 \;\;{x=3}}{{x = 1}  \;\;\;\;\;\;    x+2=3}}wp } {x = 1  \implies x+2=3}skip $$ 
+
 Putting us back in familiar territory, and the proof follows quite easily.
 ```
 lemma triple2: hoare [ Func1.add_2 : x = 1 ==> res = 3 ].
@@ -249,7 +233,7 @@ proof.
 qed.
 ```
 
-Let us now look at the triple $\{\texttt{false}\}\,x:=15\,\{x = 0\}.$
+Let us now look at the triple ${\texttt{false}}\,x:=15\,{x = 0}.$
 Theoretically, we know that this triple doesn't hold, since \texttt{false} never holds. We have the `proc x_15` in the `module Func2` that we can use to express that triple in EasyCrypt. The interesting thing is that we can actually write proof for the triple in question.
 ```
 lemma triple4: hoare [ Func2.x_15 : false ==> res=0 ].
@@ -343,7 +327,7 @@ proc exp (x n: int) : int =
 
 Let us formulate a Hoare triple that says that \texttt{exp(10, 2) = 100}, since of course $10^2 = 100$.
 
-We would have the triple $\{x = 10 /\textbackslash n=2 \} \texttt{ Exp.exp } \{\texttt{res}=100\}$. In EasyCrypt we would state the lemma like we have done earlier. For the proof, we will employ loop unrolling. We adopt this method since we know that the while loop will be executed twice, and we can work through those manually. To unroll a loop with `unroll n`, where `n` is the line of code with the loop statement, a `while` loop in our case. With the loops unrolled, we get two if conditions which we know will hold, and a while loop for which the condition will not hold. To reason with loops and conditions like these EasyCrypt provides two tactics `rcondt`, and `rcondf`. They can be read as "remove the condition with a true/false assignment". We will use the `rcondf` version. This forces us to prove that the boolean in the `while` block, `(i<n)` evaluates to `false` in order for it to get rid of the block entirely. So we are asked to prove that `!(i<n)`, which is quite simple to prove. The rest of the proof also comes through quite easily as well.
+We would have the triple ${x = 10 /\textbackslash n=2 } \texttt{ Exp.exp } {\texttt{res}=100}$. In EasyCrypt we would state the lemma like we have done earlier. For the proof, we will employ loop unrolling. We adopt this method since we know that the while loop will be executed twice, and we can work through those manually. To unroll a loop with `unroll n`, where `n` is the line of code with the loop statement, a `while` loop in our case. With the loops unrolled, we get two if conditions which we know will hold, and a while loop for which the condition will not hold. To reason with loops and conditions like these EasyCrypt provides two tactics `rcondt`, and `rcondf`. They can be read as "remove the condition with a true/false assignment". We will use the `rcondf` version. This forces us to prove that the boolean in the `while` block, `(i<n)` evaluates to `false` in order for it to get rid of the block entirely. So we are asked to prove that `!(i<n)`, which is quite simple to prove. The rest of the proof also comes through quite easily as well.
 
 ```
 lemma ten_to_two:
