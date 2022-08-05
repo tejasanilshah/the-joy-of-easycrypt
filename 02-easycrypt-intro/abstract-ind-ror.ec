@@ -31,17 +31,17 @@ require import Real Bool DBool.
 type msg.
 type cip.
 
-(* Encrypt and decrypt operations *)
+(* Encrypt and decrypt operations. *)
 op enc: msg -> cip.
 op dec: cip -> msg.
 
-(* Compute operations for the adversary *)
+(* Compute operations for the adversary. *)
 op comp: cip -> bool.
 
 (*
 Next we define the module types.
 These are blueprints for concrete types
-that we instantiate right after we define them
+that we instantiate right after we define them.
 *)
 
 module type Challenger = {
@@ -60,11 +60,11 @@ module C:Challenger = {
  }
 }.
 
-(* Similarly we define an adversary *)
+(* Similarly we define an adversary. *)
 module type Adversary = {
   proc guess(c:cip): bool
 }.
-(* and an instance of the same *)
+(* and an instance of the same. *)
 module Adv:Adversary = {
 
   proc guess(c:cip): bool = {
@@ -72,18 +72,18 @@ module Adv:Adversary = {
   }
 }.
 
-(* The game module and the claims related to it *)
+(* The game module and the claims related to it. *)
 module Game(C:Challenger, Adv:Adversary) = {
   
   proc ind_ror(): bool = {
       var m:msg;
       var c:cip;
       var b,b_adv:bool;
-      b <$ {0,1}; (* Pick b uniformly at random *)
+      b <$ {0,1}; (* Pick b uniformly at random. *)
       if(b=true){
-        (* Set m to be an authentic message *)
+        (* Set m to be an authentic message. *)
       } else {
-        (* Set m to be a random string *)
+        (* Set m to be a random string. *)
       }
       c <- C.encrypt(m);
       b_adv <- Adv.guess(c);

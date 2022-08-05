@@ -178,13 +178,7 @@ The complete code of the example can be found in `abstract-ind-ror.ec` file. Mos
 
 These four keybindings should be enough to get you through this file. We will return to more navigation and other important keybindings in the next chapter. We include these instructions in the file as well, so you don't have to keep switching back and forth. Upon evaluating the first instructions, the screen should look like so:
 
-\begin{figure} [!ht] %if [h] doesn't work, we can force with !
-\begin{center}
-\includegraphics[width=\textwidth]{figures/abstract-ind-ror.png}
-\caption{Working with \mintinline{bash}{abstract-ind-ror.ec}}
-\label{fig:ind-ror}
-\end{center}
-\end{figure}
+![Working with `abstract-ind-ror.ec`](/assets/abstract-ind-ror.png)
 
 We will develop the concepts required to work with it in the following chapters. However, we encourage you to get started working with the tool and try it out right away.
 
@@ -194,7 +188,6 @@ Now that we understand that overarching structure of what we can achieve with Ea
 EasyCrypt allows us to work with mathematical objects and results of different types. To work with these different results, EasyCrypt has the following logics:
 
 1. **Ambient logic**:
-
 This is the higher-order logic that allows us to reason with the proof objects and terms.
 2. **Hoare logic and its variants**:
     1. **Hoare Logic (HL)**: Allows us to reason about a set of instructions or a single program. This is often called classical Hoare logic.
