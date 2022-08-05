@@ -9,11 +9,11 @@ EasyCrypt is written in OCaml and uses many external tools and libraries. Howeve
     *Note*: EasyCrypt also has a batch processing mode which doesn't need the Emacs + Proof General front-end and only requires a terminal. However, this mode is used to check multiple files and not to write proofs.
     
 2. **External Provers and Why3**:
-    Often called SMT (Satisfiability Modulo Theory) provers or SMT solvers are powerful tools that try to solve the problem of satisfiability of a formula given a set of conditions. With EasyCrypt, there is a possibility to use multiple external provers like Alt-Ergo~\cite{alt-ergo}, Z3~\cite{z3} and CVC4~\cite{cvc4}, and Why3~\cite{why3} is used as the platform for all the provers.
+    Often called SMT (Satisfiability Modulo Theory) provers or SMT solvers are powerful tools that try to solve the problem of satisfiability of a formula given a set of conditions. With EasyCrypt, there is a possibility to use multiple external provers like [Alt-Ergo](https://alt-ergo.ocamlpro.com/), [Z3](https://github.com/Z3Prover/z3) and [CVC4](https://cvc4.github.io/), and [Why3](https://why3.lri.fr/) is used as the platform for all the provers.
 
     These provers can take care of a lot of the low-level and often gruelling work of proving some mathematical results, as we will see.
 
-*Note*: Since there are a lot of external dependencies setting up the environment can be quite time-consuming. The best instructions for setting up EasyCrypt aren't on the official repository but can be found on Alley Stoughton's website~\cite{ec-setup}. We also provide a screen recording~\cite{}\todo{CITE} in which we go through the instructions step-by-step and also troubleshoot some of the problems that can arise. We omit these instructions here since these can change. There are also plans to simplify the installation process with a portable application for EasyCrypt. However, until these plans materialize, we have to rely on the current method of installation.
+*Note*: Since there are a lot of external dependencies setting up the environment can be quite time-consuming. The best instructions for setting up EasyCrypt aren't on the official repository but can be found on [Alley Stoughton's website](https://alleystoughton.us/easycrypt-installation.html). We also provide [a screen recording]() in which we go through the instructions step-by-step and also troubleshoot some of the problems that can arise. We omit these instructions here since these can change. There are also plans to simplify the installation process with a portable application for EasyCrypt. However, until these plans materialize, we have to rely on the current method of installation.
 
 Now without delving too much into the theory, let us start with a quick motivating example.
 
@@ -26,8 +26,10 @@ To model it mathematically, let us assume we have a cryptographic protocol, $CP$
 
 So the game for IND-RoR under the protocol, $CP$, would proceed as follows:
 1. Pick $b \in \{0,1\}$, uniformly at random.
-2. If $b = 0$, the challengers encrypt a real message using $Enc$.\\Let us call it $c_0 = Enc(m_{\textit{real}})$
-3. If $b = 1$, the challengers encrypt a random bitstring using $Enc$.\\Let us call it $c_1 = Enc(m_{\textit{random}})$
+2. If $b = 0$, the challengers encrypt a real message using $Enc$.
+Let us call it $c_0 = Enc(m_{\textit{real}})$
+3. If $b = 1$, the challengers encrypt a random bitstring using $Enc$.
+Let us call it $c_1 = Enc(m_{\textit{random}})$
 4. If $b=0$, send $c_0$ to the adversary, else send $c_1$
 5. Adversary is allowed to perform its computations on the provided ciphertext and is expected to output $b_{\textit{adv}}$
 6. Now, the adversary is said to win the game if they have a non-negligible advantage in correctly guessing which ciphertext (real or random) they were supplied with.
@@ -42,19 +44,22 @@ Let us develop an EasyCrypt proof sketch for the game that we defined above.
 
 Every EasyCrypt proof consists of the following major steps:
 
-1. **Defining the objects**: We first need to establish the context we would like to work in. EasyCrypt comes with several predefined types, operators and functions, such as integers, real numbers, etc. Hence we begin by loading (\ec{require}) and importing (\ec{import}) the theories into the current environment (files that contain these definitions are called theory files or just theories) that we need.
+### Defining the objects
 
-    In this example, we will only need the \ec{Real Bool DBool} theory files.
-    \ec{Real} and \ec{Bool} are needed to work with real and boolean types, and we need the \ec{DBool} (boolean distribution) to pick a boolean value at random.
-    Importing these theories works like so:
+We first need to establish the context we would like to work in. EasyCrypt comes with several predefined types, operators and functions, such as integers, real numbers, etc. Hence we begin by loading (\ec{require}) and importing (\ec{import}) the theories into the current environment (files that contain these definitions are called theory files or just theories) that we need.
+
+In this example, we will only need the \ec{Real Bool DBool} theory files.
+\ec{Real} and \ec{Bool} are needed to work with real and boolean types, and we need the \ec{DBool} (boolean distribution) to pick a boolean value at random.
+Importing these theories works like so:
     
-    \begin{easycrypt}{Importing theory files}{list:reqimp}
-    require import Real Bool DBool.    \end{easycrypt}
-    Notice how the statement ends with a \enquote{\ec{.}}; this is how statements are terminated in EasyCrypt.
-    
-    In addition to the built-in types, we might need custom data types and operations. EasyCrypt allows us to do so using the keywords \ec{type} and \ec{op}.
-    
-    Let us define a \ec{msg} type for messages, and \ec{cip} type for ciphertexts. Then let us define the operation \ec{enc: msg -> cip} which defines a function called \ec{enc} mapping \ec{msg} to \ec{cip}, and a function called \ec{dec} to go back from \ec{cip} to \ec{msg}. Additionally, let us also define a function called \ec{comp} to model the adversary performing some computation upon receiving a \ec{cip} and returning a \ec{bool}.
+\begin{easycrypt}{Importing theory files}{list:reqimp}
+require import Real Bool DBool.    \end{easycrypt}
+Notice how the statement ends with a \enquote{\ec{.}}; this is how statements are terminated in EasyCrypt.
+
+In addition to the built-in types, we might need custom data types and operations. EasyCrypt allows us to do so using the keywords \ec{type} and \ec{op}.
+
+Let us define a \ec{msg} type for messages, and \ec{cip} type for ciphertexts. Then let us define the operation \ec{enc: msg -> cip} which defines a function called \ec{enc} mapping \ec{msg} to \ec{cip}, and a function called \ec{dec} to go back from \ec{cip} to \ec{msg}. Additionally, let us also define a function called \ec{comp} to model the adversary performing some computation upon receiving a \ec{cip} and returning a \ec{bool}.
+
 \begin{easycrypt}{Defining types and ops}{list:typeop}
 type msg.
 type cip.
@@ -69,9 +74,10 @@ op comp: cip -> bool.
     Note that these are only abstract definitions, and we haven't specified the details of these types or functions. The interesting thing about EasyCrypt is that we can already go pretty far with the abstract types and operations.
     
     
-    Let us keep going and define custom module types and modules. Module types can be thought of as blueprints, while modules can be thought of as concrete instances of module types. For those familiar with object-oriented programming, this is similar to interfaces for classes and the classes that implement those interfaces.
-    
-    In our example, the challengers have the ability to encrypt and decrypt messages. We can model this by creating a module type called \ec{Challenger}, which needs to have two procedures called \ec{encrypt} and \ec{decrypt}. As we said, a module type is simply a blueprint. To work with the module types, we could create a concrete instance of the \ec{Challenger} type and fill out the procedures. In our example, we create a module, \ec{C}, of type \ec{Challenger}. \ec{C} has to implement the procedures \ec{encrypt} and \ec{decrypt}. This can be achieved like so.
+Let us keep going and define custom module types and modules. Module types can be thought of as blueprints, while modules can be thought of as concrete instances of module types. For those familiar with object-oriented programming, this is similar to interfaces for classes and the classes that implement those interfaces.
+
+In our example, the challengers have the ability to encrypt and decrypt messages. We can model this by creating a module type called \ec{Challenger}, which needs to have two procedures called \ec{encrypt} and \ec{decrypt}. As we said, a module type is simply a blueprint. To work with the module types, we could create a concrete instance of the \ec{Challenger} type and fill out the procedures. In our example, we create a module, \ec{C}, of type \ec{Challenger}. \ec{C} has to implement the procedures \ec{encrypt} and \ec{decrypt}. This can be achieved like so.
+
 \begin{easycrypt}{Defining module types and modules}{list:modtype}
 module type Challenger = {
   proc encrypt(m:msg): cip
@@ -123,11 +129,9 @@ module Game(C:Challenger, Adv:Adversary) = {
 
 Here, we leave the \ec{if} and \ec{else} blocks empty since we don't want to introduce too much complexity in this motivating example.
 
-    \item \textbf{Making claims}:
-    
-    Once we have the objects defined, we can make claims related to these objects. We can either state these claims as axioms with the \ec{axiom} keyword, in which case EasyCrypt will not expect a proof or a lemma with the \ec{lemma} keyword, and EasyCrypt will expect a proof for the statement. 
-    
-    For our running example, a claim that we can state is that the probability of \ec{(b_adv=b)} or the result, \ec{res}, holding is certainly less than or equal to 1. This statement about the probability of an event is universally true. Hence we can state it as an axiom like so:
+### Making claims
+Once we have the objects defined, we can make claims related to these objects. We can either state these claims as axioms with the \ec{axiom} keyword, in which case EasyCrypt will not expect a proof or a lemma with the \ec{lemma} keyword, and EasyCrypt will expect a proof for the statement. 
+For our running example, a claim that we can state is that the probability of \ec{(b_adv=b)} or the result, \ec{res}, holding is certainly less than or equal to 1. This statement about the probability of an event is universally true. Hence we can state it as an axiom like so:
     
 \begin{easycrypt}{Stating an axiom}{list:axiom}
 axiom ind_ror_pr_le1:
@@ -140,17 +144,18 @@ We will look at the components in more detail as we go along. However, the key t
 
 Next, let us claim that the cryptosystem is indeed IND-RoR secure. Statements like these are what we intend to prove and are the main reason we go through the whole setup.
 
-\textit{Note}: We skip the detail about the negligible advantage and $\epsilon$ since this is only an illustrative example. We'd pay more attention to the details when we work with an actual protocol. 
+*Note*: We skip the detail about the negligible advantage and $\epsilon$ since this is only an illustrative example. We'd pay more attention to the details when we work with an actual protocol.
+
 \begin{easycrypt}{Stating a lemma}{list:lemma}
 lemma ind_ror_secure:
 phoare [Game(C,Adv).ind_ror: true ==> res]<=(1%r/2%r).
 \end{easycrypt}
 
-    \item \textbf{Proofs}:
+### Proofs
     
-    Once we state a lemma, EasyCrypt expects a proof for the same. It is good practice to start a proof script with the \ec{proof} keyword, but it is not strictly necessary. A proof script is a sequence of tactics that transform the goal into zero or more sub-goals. A proof is said to be complete or discharged once we get to zero sub-goals. Upon completing a proof, we end the script with \ec{qed}, and EasyCrypt adds the lemma to the environment.
-    
-    Since we haven't filled out the details in our running example, we can't really make progress with the proof of \ec{lemma ind_ror_secure}, so for this example, we will \ec{admit} it. Admitting a result is akin to axiomatizing it. Ideally, we wouldn't want to axiomatize a lemma. However, we use this example to illustrate the structure of EasyCrypt proofs in general.
+Once we state a lemma, EasyCrypt expects a proof for the same. It is good practice to start a proof script with the \ec{proof} keyword, but it is not strictly necessary. A proof script is a sequence of tactics that transform the goal into zero or more sub-goals. A proof is said to be complete or discharged once we get to zero sub-goals. Upon completing a proof, we end the script with \ec{qed}, and EasyCrypt adds the lemma to the environment.
+
+Since we haven't filled out the details in our running example, we can't really make progress with the proof of \ec{lemma ind_ror_secure}, so for this example, we will \ec{admit} it. Admitting a result is akin to axiomatizing it. Ideally, we wouldn't want to axiomatize a lemma. However, we use this example to illustrate the structure of EasyCrypt proofs in general.
     
 \begin{easycrypt}{Proof script}{list:proof_ind_ror}
 lemma ind_ror_secure:
@@ -160,16 +165,14 @@ proof.
 qed.
 \end{easycrypt}
 
-\end{enumerate}
-
 The complete code of the example can be found in \mintinline{bash}{abstract-ind-ror.ec} file. Most proof scripts are developed interactively. To get a taste of how this works, you can open \mintinline{bash}{abstract-ind-ror.ec} in Emacs. This should happen automatically if you open any \mintinline{bash}{.ec} file. Once you open the file, you can step through the proof line by line using the following keystrokes.
 
-\begin{enumerate}
-    \item \keys{\ctrl + c} and then \keys{\ctrl + n} to evaluate one line/block of code
-    \item \keys{\ctrl + c} and then \keys{\ctrl + u} to go back one line/block of code
-    \item \keys{\ctrl + x} \keys{\ctrl + s} to save the file
-    \item \keys{\ctrl + x} \keys{\ctrl + c} to exit Emacs\footnote{Emacs will prompt you to save the file if you modified it and remind you that there is an active easycrypt process running. So please pay attention to the prompts. You need to respond with a \enquote{yes} to the prompt about killing the easycrypt process to exit Emacs.} 
-\end{enumerate}
+
+1. <kbd>ctrl + c</kbd> and then <kbd>ctrl + n</kbd> to evaluate one line/block of code
+2. <kbd>ctrl + c</kbd> and then <kbd>ctrl + u</kbd> to go back one line/block of code
+3. <kbd>ctrl + x</kbd> <kbd>ctrl + s</kbd> to save the file
+4. <kbd>ctrl + x</kbd> <kbd>ctrl + c</kbd> to exit Emacs.*
+<sup>* Emacs will prompt you to save the file if you modified it and remind you that there is an active easycrypt process running. So please pay attention to the prompts. You need to respond with a "yes" to the prompt about killing the easycrypt process to exit Emacs.</sup>
 
 These four keybindings should be enough to get you through this file. We will return to more navigation and other important keybindings in the next chapter. We include these instructions in the file as well, so you don't have to keep switching back and forth. Upon evaluating the first instructions, the screen should look like so:
 
@@ -188,13 +191,13 @@ Now that we understand that overarching structure of what we can achieve with Ea
 
 EasyCrypt allows us to work with mathematical objects and results of different types. To work with these different results, EasyCrypt has the following logics:
 
-1. **Ambient logic**:\\
+1. **Ambient logic**:
 This is the higher-order logic that allows us to reason with the proof objects and terms.
 2. **Hoare logic and its variants**:
-    a. **Hoare Logic (HL)**: Allows us to reason about a set of instructions or a single program. This is often called classical Hoare logic.
-    b. **Relational Hoare Logic (RHL)**: Allows us to reason about a pair of programs.
-    c. **Probabilistic Hoare Logic (pHL)**: When we have a program with elements of probabilistic behaviour, we need to modify classical Hoare Logic to work with the elements of probability. EasyCrypt supports working with these kinds of programs as well.
-    d. **Probabilistic Relational Hoare Logic (pRHL)**: Similarly, pRHL allows us to reason with pairs of programs with probabilistic behaviour.
+    1. **Hoare Logic (HL)**: Allows us to reason about a set of instructions or a single program. This is often called classical Hoare logic.
+    2. **Relational Hoare Logic (RHL)**: Allows us to reason about a pair of programs.
+    3. **Probabilistic Hoare Logic (pHL)**: When we have a program with elements of probabilistic behaviour, we need to modify classical Hoare Logic to work with the elements of probability. EasyCrypt supports working with these kinds of programs as well.
+    4. **Probabilistic Relational Hoare Logic (pRHL)**: Similarly, pRHL allows us to reason with pairs of programs with probabilistic behaviour.
 
 With these logics, EasyCrypt allows us to verify the security properties of cryptographic protocols. Most cryptographic proofs are game-based, implying that we need the ability to work with pairs of programs, as we saw earlier in the IND-RoR example. This is essentially why we need RHL and pRHL.
 
