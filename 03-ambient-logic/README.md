@@ -12,8 +12,8 @@ So, "C-c C-n" simply means: <kbd>Ctrl + c</kbd> and then <kbd>Ctrl + n</kbd>.
 
 Apart from all the basic keybindings of Emacs, we have a few more bindings that are used specifically for interactive theorem proving in EasyCrypt. We list some of the most common commands here:
 
-|  #    |  Keystroke    |                  Command                      |
-|:--:   |:-----------:  |:-----------------------------------------:    |
+| #     | Keystroke     | Command                                       |
+|----   |-------------  |-------------------------------------------    |
 | 1.    | C-c C-n       | Evaluate next line or block of code           |
 | 2.    | C-c C-u       | Go back one line or block of code             |
 | 3.    | C-c C-ENTER   | Evaluate until the cursor position            |
@@ -43,9 +43,9 @@ Before we dive into cryptography, we need to understand how to direct EasyCrypt 
 ```
 lemma name ... : ... . 
 proof.
-    $tactic_1$.
+    tactic_1.
     ...
-    $tactic_n$.
+    tactic_n.
 qed.
 ```
 
@@ -97,9 +97,7 @@ EasyCrypt comes with many predefined lemmas and axioms that we can use. For inst
 
 We can ask EasyCrypt to print using: `print addzC.`
 
-EasyCrypt responds with:
-
-`axiom nosmt addzC: forall (x y : int), x + y = y + x.`
+EasyCrypt responds with: `axiom nosmt addzC: forall (x y : int), x + y = y + x.`
 
 ## Tactic: `simplify`
 
@@ -191,10 +189,9 @@ print axiom Int.fold0.
 The keywords simply act as qualifiers and filters. You can print even without those. The qualifiers simply help us to narrow the results.
 
 The `search` command allows us to search for axioms and lemmas involving a list of operators. It accepts arguments enclosed in the following braces:
-1. $[\,]$ - Square braces for unary operators
-2. $(\,)$ - Curly braces for binary operators
+1. \[ \] - Square braces for unary operators
+2. ( ) - Curly braces for binary operators
 3. Combination of these separated by a space
-\end{enumerate}
 
 ```
 search [-].
@@ -216,7 +213,9 @@ In the file, we have peppered some exercises that require the reader to search f
 An important point to understand is that EC was built to work with cryptographic properties and more complex things. So although general mathematical theorems and claims can be proven in EC, it will be quite painful to do so. We will employ powerful automated tools to take care of some of these low-level tactics and logic. EC offers this in the form of the `smt` tactic. When we run `smt`, EC sends the conclusion and the context to external smt solvers like `Z3`, `Alt-Ergo` etc., that have been configured to be used by EasyCrypt. If they can solve the goal, then `smt` will discharge the specific sub-goal that it was invoked on. If not, `smt` fails, and the burden of the proof is still on us.
 
 For example, if we wish to prove the result:
+
 $$ \forall x \in \mathbb{R}, \forall a, b \in \mathbb{Z}, \text{ and } x \neq 0 \implies x^a * x^b = x^{a+b} $$
+
 We would do it like so:
 
 ```
