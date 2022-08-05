@@ -1,4 +1,4 @@
-Working through (\mintinline{bash}{ambient-logic.ec}) should give you a good grasp of the ambient logic and tactics for reasoning with simple math. Up until now, we were working with mathematical proofs that only used logical reasoning. However, when working with programs and procedures we need a way to reason with what the programs do.
+Working through `ambient-logic.ec` should give you a good grasp of the ambient logic and tactics for reasoning with simple math. Up until now, we were working with mathematical proofs that only used logical reasoning. However, when working with programs and procedures we need a way to reason with what the programs do.
 
 For instance, let us think about an exponentiation program for integers like so:
 ```
@@ -13,27 +13,27 @@ exp(x, n):
 
 When presented with a program like this, our objective is to figure out if the program behaves correctly. At first glance, this program seems correct. However, a glaring mistake here is that the program will always return $1$ as a result if we pass any negative integer as the second argument. That isn't the behaviour we expect from an exponentiation function. So saying that the program is correct would be a false claim. So to make claims about the behaviour of the program, mathematically, we would say something like:
 
-$$ \text{Given } \underbrace{ x \in \mathbb{Z}, n \in \mathbb{Z} \text{ and } n \ge 0 }_\text{pre-condition}, \,\underbrace{exp(x, n)}_\text{program} \text{ returns} \underbrace{r = x ^{n}}_\text{post-condition} $$
+$$ \text{Given } \underbrace{ x \in \mathbb{Z}, n \in \mathbb{Z} \text{ and } n \ge 0 }_\text{pre-condition} \underbrace{exp(x, n)}_\text{program} \text{ returns} \underbrace{r = x ^{n}}_\text{post-condition} $$
 
 # The Hoare triple
 As marked in the statement above, claims that we make generally have three distinct parts: preconditions, the program and postconditions. Hoare logic formalises these three parts and introduces them as a \textbf{Hoare triple}.
 
 A Hoare triple is denoted like so:
 
-$$  {P} C {Q} $$
+$$  \{P\} \ C \ \{Q\} $$
 
-Here $ P \text{ and } Q $, are conditions on the program variables used in $C$. Conditions on program variables are written using standard mathematical notations together with logical operators like $\wedge$ (‘and’), $\vee$ (‘or’), $\neg$ (‘not’) and $\implies$ (‘implies’). Additionally, we have special conditions $true$ or $T$ which always holds, and $false$ or $F$ which never holds.
+Here $ P,Q $ , are conditions on the program variables used in $C$. Conditions on program variables are written using standard mathematical notations together with logical operators like $\wedge$ (‘and’), $\vee$ (‘or’), $\neg$ (‘not’) and $\implies$ (‘implies’). Additionally, we have special conditions $true$ or $T$ which always holds, and $false$ or $F$ which never holds.
 
 $C$ is a program in some specified language.
 
-We say that a Hoare triple, $ {P} C {Q}$, holds if whenever $C$ is executed from a state satisfying $P$ and if the execution of $C$ terminates, then the state in which $C$’s execution terminates satisfies $Q$. We will limit our discussion to programs which terminate.
+We say that a Hoare triple, $ {P} C {Q}$ , holds if whenever $C$ is executed from a state satisfying $P$ and if the execution of $C$ terminates, then the state in which $C$’s execution terminates satisfies $Q$. We will limit our discussion to programs which terminate.
 
 ## Examples
-1. ${x = n} x:= x+1 {x = n+1}$ holds. ($:=$ is the assignment operator)
-2. ${x = n} \, x:= x+1 \, {x = n+ 2}$ doesn't hold.
-3. $ {true} \,C\, {Q}$ is a triple in which the precondition always holds. So we'd say that this triple holds for every $C$ that satisfies the postcondition $Q$.
-4. $ {P} \,C\, {true}$, similarly, this triple holds for every precondition $P$ that is satisfied, and every program $C$.
-5. $ {false} \,C\, {Q}$, is an interesting triple which, according to our definitions, doesn't hold since false is a statement that never holds. However, this is a slightly special case, as we will see in EasyCrypt.
+1. $ \{ x = n \} \  x:= x+1 \ \{ x = n+1 \} $ holds. ( $:=$ is the assignment operator)
+2. $ \{ x = n \} \ x:= x+1 \ \{ x = n+ 2 \} $ doesn't hold.
+3. $ \{ true \} \ C \ \{ Q \} $ is a triple in which the precondition always holds. So we'd say that this triple holds for every $C$ that satisfies the postcondition $Q$.
+4. $ \{ P \} \ C \  \{ true \} $, similarly, this triple holds for every precondition $P$ that is satisfied, and every program $C$.
+5. $ \{ false \} \ C \ \{ Q \} $, is an interesting triple which, according to our definitions, doesn't hold since false is a statement that never holds. However, this is a slightly special case, as we will see in EasyCrypt.
 
 ## Exercises
 1. Does $ {x=1} \, x:=x+2\, {x=3}$ hold?
