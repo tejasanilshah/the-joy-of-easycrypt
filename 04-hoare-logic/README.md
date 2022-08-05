@@ -210,4 +210,300 @@ For instance, when we have $\\{P\\} S1; S2; S3; \\{Q\\}$ and $S2; S3;$ are state
 
 $$ \dfrac{ \dfrac{ \\{P\\} S1; S2; S3; \\{Q\\}}    {\\{P\\} S1; \\{R\\} /\textbackslash \\{R\\} S2; S3; \\{Q\\}}\texttt{wp} } {\\{P\\} S1; \\{R\\}} $$
 
+The triple $\\{R\\} S2; S3; \\{Q\\}$ is guaranteed to hold, and hence the goal transforms to just $\\{P\\} S1; \\{R\\}$.
+In our context, we use `wp`, and `skip` to get the following proof tree:
+
+$$ \dfrac{\dfrac{\\{x = 1\\} \ \  x:= x+2 \ \ \\{x=3\\}}{\\{x = 1\\}  \ \ \ \ \ \  \\{x+2=3\\}}wp } {x = 1  \implies x+2=3}skip$$
+
+Putting us back in familiar territory, and the proof follows quite easily.
+```
+lemma triple2: hoare [ Func1.add_2 : x = 1 ==> res = 3 ].
+proof.
+    proc.
+    wp.
+    skip.
+    move => &m x.
+    subst.
+    trivial.
+qed.
+```
+## Automation, and special cases
+Now that we have an understanding of how we can make progress, let us take a look at how we can use automation since we still have powerful external solvers at our disposal and we would like to use them whenever we can.
+We will be working with the following procedures in this section.
+```
+module Func2 = {
+  proc x_sq (x:int) : int = { return x*x; }
+  proc x_0  (x:int) : int = { x <- x*x; x<- x-x; return x; }
+  proc x_15 (x:int) : int = { x <- 15; return x; }
+}.
+```
+
+For instance, let us take a look at a triple, which states that if you square any integer greater than or equal to 4, the result is greater than or equal to 16. Pretty trivial and straightforward when you think about it. However, the proof for something simple like this becomes quite tiresome, hence we will simply ask `smt` to handle it. The only issue however is that smt solvers can only work on goals in ambient logic. So it is up to us to bring the goal to a state that doesn't involve Hoare logic. In this example, since `x_sq` consists of a single `return` statement, `proc` and `skip` are enough.
+```
+lemma triple3: hoare [ Func2.x_sq : 4 <= x ==> 16 <= res ].
+proof.
+    proc.
+    skip.
+    smt.
+qed.
+```
+
+Let us now look at the triple $\\{\text{false}\\} \ x:=15 \ \\{x = 0\\}.$
+Theoretically, we know that this triple doesn't hold, since `false` never holds. We have the `proc x_15` in the `module Func2` that we can use to express that triple in EasyCrypt. The interesting thing is that we can actually write proof for the triple in question.
+```
+lemma triple4: hoare [ Func2.x_15 : false ==> res=0 ].
+proof.
+    proc.
+    wp.
+    skip.
+    move => _ f.
+    trivial.
+qed.
+```
+The reason we can do this is that we essentially force the assumption that `false` holds and we want to prove the postcondition $15 = 0$. As absurd as it is, we know that `false` is the strongest statement there is. By getting EasyCrypt to the state where `false` holds would imply that anything and everything can be derived from it. Hence we can actually "prove" that $15 = 0$.
+
+The point to understand here is that we could only do this because we moved `false` into the context manually when we used the `move =>`. So our math is still consistent and the world hasn't exploded yet. The way to think about this triple is assuming `false` holds implies that $15 = 0$.
+
+## Conditionals and loops
+Let us now work with some more interesting functions and triples. We define a flipper function which simply returns the opposite of the boolean value that it gets.
+
+```
+module Flip = {
+
+proc flipper (x: bool) : bool = 
+  {
+  var r: bool;
+  if (x = true) 
+  { r <- false; }
+  else
+  { r <- true; }
+  return r;
+  }
+}.
+```
+Let us say that we would like to prove the fact related to this program, that if the input is $\\{\text{true}\\}$, $\texttt{Flip.flipper}$ returns $\\{\text{false}\\}$.
+
+We use a slightly verbose proof here to demonstrate how to open up an `if` block. Using the `if` tactic in the proof script gives us two goals, one in which the `if` condition holds, and another in which it doesn't. In our case, it splits into one goal with `x = true`, and another with `x <> true`. Additionally, when the current goal is a HL, pHL, pRHL statement the `auto` tactic uses various tactics in an attempt to reduce the goal to a simpler one automatically. It never fails, but it may fail to make any progress. For instance, in this first usage of the tactic, it does the job of the `wp, skip, and trivial` tactics.
+```
+lemma flipper_correct_t:
+    hoare [ Flip.flipper : x = true ==> res = false ].
+proof.
+proc.
+if.
+  (* Goal 1:  x = true *)
+  auto.
+
+  (* Goal 2: x <> true. *)
+  auto.
+  smt.
+qed.
+```
+
+Notice the repetition of proof steps in the branches. This can be reduced by using tacticals. In order to tell EasyCrypt to repeatedly use certain tactics on all resulting goals, we use the ";" tactical. So, we can simplify the above proof like so
+```
+lemma flipper_correct_f: 
+    hoare [ Flip.flipper : x = false ==> res = true ].
+proof.
+    proc.
+    if; auto; smt.
+qed.
+```
+
+However, since this program is quite simple we can actually make the proof shorter. We can also make the logic more abstract like so:
+```
+lemma flipper_correct (x0: bool):
+    hoare [ Flip.flipper : x = x0  ==> res <> x0 ].
+proof.
+  proc.
+  auto.
+  smt.
+qed.
+```
+
+This is how proofs are polished and made shorter. We first write a verbose proof, then keep experimenting to find shorter and more elegant proofs.
+
+Let us now increase the difficulty and work with a slightly more involved example. We define the exponentiation function that we saw earlier in EasyCrypt.
+
+```
+module Exp = {
+proc exp (x n: int) : int = 
+  {
+  var r, i;
+  r <- 1;
+  i <- 0;
+  while (i < n){
+    r <- r*x;
+    i <- i+1;
+  }
+  return r;
+  }
+}.
+```
+
+Let us formulate a Hoare triple that says that `exp(10, 2) = 100`, since of course $10^2 = 100$.
+
+We would have the triple $\\{x = 10 /\textbackslash n=2 \\} \text{Exp.exp} \\{\text{res}=100\\}$. In EasyCrypt we would state the lemma like we have done earlier. For the proof, we will employ loop unrolling. We adopt this method since we know that the while loop will be executed twice, and we can work through those manually. To unroll a loop with `unroll n`, where `n` is the line of code with the loop statement, a `while` loop in our case. With the loops unrolled, we get two if conditions which we know will hold, and a while loop for which the condition will not hold. To reason with loops and conditions like these EasyCrypt provides two tactics `rcondt`, and `rcondf`. They can be read as "remove the condition with a true/false assignment". We will use the `rcondf` version. This forces us to prove that the boolean in the `while` block, `(i<n)` evaluates to `false` in order for it to get rid of the block entirely. So we are asked to prove that `!(i<n)`, which is quite simple to prove. The rest of the proof also comes through quite easily as well.
+
+```
+lemma ten_to_two:
+    hoare [ Exp.exp : x = 10 /\ n = 2 ==> res = 100 ].
+proof.
+    proc.
+    simplify. (* Makes the goal more readable *)
+    unroll 3.
+    unroll 4.
+    rcondf 5.
+    (* post = !(i<n) *)
+    wp.
+    skip.
+    smt.
+    (* post = r = 100  *)
+    wp.
+    skip.
+    smt.
+qed.
+```
+
+As usual, we could have used some tacticals to shorten the proof. So let us do that, to clean up the previous proof.
+```
+lemma ten_to_two_clean:
+    hoare [ Exp.exp : x = 10 /\ n = 2 ==> res = 100 ].
+proof.
+    proc.
+    unroll 3.
+    unroll 4.
+    rcondf 5; auto.
+qed.
+```
+
+For a loop that unrolls twice, it is easy to do it manually. However, this strategy wouldn't work for a different scenario. For instance, in order to prove that the program works correctly, we need to prove the correctness for every number, so we would prefer to work with abstract symbols and not concrete numbers like $10^2$. In order to work up to it, let us try to prove that $2^{10}$ works as intended. But first, we need to understand that EasyCrypt was not built for computations. It can handle small calculations like we've seen so far but asking EasyCrypt to do $2^{10}$ doesn't work as we'd like it to. For instance, take a look at the following lemma, and our attempt to prove it.
+
+```
+lemma twototen: 2^10 = 1024.
+proof.
+    (* We can't make any progress with these. *)
+    trivial.
+    simplify.
+    auto.
+    (* 
+    smt fails as well, we will admit this result,
+    since we know it is true.
+    *)
+    admit.
+qed.
+```
+
+Again, the point here is that EasyCrypt wasn't built for tasks like these. For the time being, we will admit this lemma, since we know that $2^{10}$ is in fact 1024. We need this to prove the next few lemmas relating to Hoare triples.
+
+At this point, we'd like to prove that `exp(2,10)` works as expected, however, we can't do so with direct computation since it would be painful and also not the purpose of using EasyCrypt, so to reason with loops, we need to be able to think of loop invariants and think about the program variables which change. For instance, we know that the variable `x` remains the same throughout the computation. So let us try to get rid of the `while` loop stating that this is the only invariant. We know that this is obviously not enough, since doing this will in a sense forget about what happens to the other variables. However, examples that get stuck are instructive as well as they allow us to understand what we did wrong. The following proof reaches a point in which the postcondition states:
+
+`post = ... forall (i0 r0 : int), ! i0 < n => x = 2 => r0 = 1024}`  
+
+This can't hold since it states that the result `r0` is 1024 for every `r0`, hence we abort this attempt.
+```
+lemma two_to_ten:
+    hoare [ Exp.exp : x = 2 /\ n = 10 ==> res = 1024 ].
+proof.
+    proc.
+    simplify.
+    while ( x = 2 ).
+    wp.
+    auto.
+abort.
+```
+Similarly, we try another invariant which helps, but still gets stuck since it doesn't account for how the variable `r` changes after every iteration of the loop. We abort this attempt as well.
+
+```
+lemma two_to_ten:
+    hoare [ Exp.exp : x = 2 /\ n = 10 ==> res = 1024 ].
+proof.
+    proc.
+    while ( x = 2  /\ 0 <= i <= n).
+    wp.
+    auto.
+    smt.
+abort.
+```
+
+We know that after every iteration, the variable `r` is multiplied by `x`. So in this case, since we have `x = 2`, essentially at the end of `i` iterations of the loop we have the fact that $\text{r} = 2^\text{i}$. This is an invariant, and it binds r to the variables that are passed to the loop. With this, we finally have all the ingredients for the invariant and we complete the proof, like so:
+
+```
+lemma two_to_ten: 
+    hoare [ Exp.exp : x = 2 /\ n = 10 ==> res = 1024 ].
+proof.
+    proc.
+    while (x = 2  /\ 0 <= i <= n /\  r = 2^i).
+    
+    wp.
+    skip.
+    smt.
+    
+    wp.
+    simplify.
+    auto.
+
+    (*
+    Sometimes, the goal can be quite complicated, and we
+    can use "progress" to break it down into smaller goals
+    *)
+    progress.
+
+    (* 2 ^ 0 = 1 *)
+    smt.
+    
+    (* 2^10 = 1024 *)
+    smt.
+qed.
+
+```
+
+Finally, we have an invariant that works. Let us clean up the proof, and also if we think about it, the condition `x=2` isn't really needed, since the program never modifies the value of `x`. Let us get rid of that condition while we are at it.
+
+```
+lemma two_to_ten_clean: hoare [ Exp.exp : x = 2 /\ n = 10 ==> res = 1024 ].
+proof.
+    proc.
+    simplify.
+    while ( r = x^i /\ 0 <= i <= n); auto; smt.
+qed.
+```
+
+Now the proof seems so innocuous and straightforward. However, it is important to understand that these proofs and figuring out the loop invariants always takes a few tries, and sometimes crafting the right invariant can be an art by itself. This also gets quite hard when there are a lot of variables to keep track of. So it is good practice to work with smaller examples first.
+
+Now let us try to work with abstract symbols, the stuff that EC was actually built for. In order to claim that the `exp` function is correct, we need to have the condition that the exponent that we provide is greater than zero. We use `x0`, and `n0`, in order to differentiate from the program variables.
+
+```
+lemma x0_to_n0_correct (x0 n0: int): 
+  0 <= n0 =>
+  hoare [ Exp.exp : x = x0 /\ n = n0 ==> res = x0 ^ n0 ].
+proof.
+    move => Hn0.
+    proc.
+    while (r=x^i /\ 0 <= i <= n).
+    wp.
+    skip.
+    smt.
+    
+    wp.
+    skip.
+    progress.
+    smt.
+    smt.
+qed.
+```
+
+Again, we can clean up the proof like so:
+```
+lemma x0_to_n0_correct_clean x0 n0: 
+  0 <= n0 =>
+  hoare [ Exp.exp : x = x0 /\ n = n0 ==> res = x0 ^ n0 ].
+proof.
+    move => Hn0.
+    proc.
+    while (r=x^i /\ 0 <= i <= n); auto; smt.
+qed.
+```
+
+With that we conclude this chapter on Hoare logic. In this chapter we first presented the theory of Hoare logic, and we saw how to work with HL in EasyCrypt. Starting with simple Hoare triples we worked our way up to reasoning with more advanced Hoare triples, and along the way we learnt some new tactics that allowed us to work with the HL goals.
+
 
