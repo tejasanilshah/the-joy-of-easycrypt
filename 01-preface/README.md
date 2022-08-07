@@ -23,7 +23,7 @@ Nevertheless, the computer-aided proof of the four-colour theorem is a significa
 
 As the field of formal verification in math took off and got established over the years, there was a problem brewing in the academic circles dealing with cryptography. At its core, modern cryptography is based on math, and to demonstrate different security properties of protocols, we come up with mathematical proofs and guarantees about them. As the field advanced, these proofs started getting fairly complex and often too complicated for humans to go through. This problem can be best illustrated with this excerpt from a [paper by Shai Halevi](https://eprint.iacr.org/2005/181.pdf):
 
-"The problem is that as a community, we generate more proofs than we carefully verify (and as a consequence some of our published proofs are incorrect). I became acutely aware of this when I wrote my EME* paper~\cite{halevi04}. After spending a considerable effort trying to simplify the proof, I ended up with a 23-page proof of security for a — err — marginally useful mode-of-operation for block ciphers. Needless to say, I do not expect anyone in his right mind to even read the proof, let alone carefully verify it."
+"The problem is that as a community, we generate more proofs than we carefully verify (and as a consequence some of our published proofs are incorrect). I became acutely aware of this when I wrote my [EME* paper](https://eprint.iacr.org/2004/125.pdf). After spending a considerable effort trying to simplify the proof, I ended up with a 23-page proof of security for a — err — marginally useful mode-of-operation for block ciphers. Needless to say, I do not expect anyone in his right mind to even read the proof, let alone carefully verify it."
 
 In the paper, Halevi highlights that cryptography as a field has advanced to the point where the proofs are so complex that the field could benefit from automation or, at the very least, some help from machines. In a way, automated and computer-assisted are the two approaches that are possible in the field of formal verification of cryptography.
 
@@ -49,7 +49,7 @@ Only a few important protocols, such as Bluetooth, and TLS, are formally verifie
 
 Additionally, a high barrier to entry to the field compounds the problem of protocols being left unverified. This is because teams developing protocols can't spend the time and effort required to go through the process of formally verifying them.
 
-In the end, the benefits of formal verification can seem marginal as the tools themselves can have flaws, leading to the philosophical conundrum of \enquote{Who will guard the guards themselves?}
+In the end, the benefits of formal verification can seem marginal as the tools themselves can have flaws, leading to the philosophical conundrum of "Who will guard the guards themselves?"
 
 As a response to these challenges, the field offers the following rebuttals:
 1. The field is still new, and the tooling is undergoing active development. Once the tools mature and are easier to use, we can expect the industry to move in the direction of requiring formal verification for protocols to be put into use. For instance, the development of the 5G protocol happened in close [collaboration with the formal verification community](https://arxiv.org/pdf/1806.10360.pdf) and is an encouraging move in the right direction
