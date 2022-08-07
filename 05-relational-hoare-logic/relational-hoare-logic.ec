@@ -225,14 +225,14 @@ With these exercises are warming up and building up those concepts.
 Before we move on to other things, let us take a look at
 something non-trivial in RHL.
 As we discussed earlier, one of the use cases of RHL
-is to ensure that compiler optimizations preserve program behaviour.
+is to ensure that compiler optimisations preserve program behaviour.
 Let us take a look at an example of this with a simple compiler
-optimization called "invariant hoisting".
+optimisation called "invariant hoisting".
 Take a look at the programs defined below.
 *)
 
 module Compiler = {
-  proc unoptimized (x y z: int) : int*int = {
+  proc unoptimised (x y z: int) : int*int = {
     while (y < z){
       y <- y + 1;
       x <- z + 1;
@@ -249,7 +249,7 @@ module Compiler = {
   Like so:
   *)
 
-  proc optimized (x y z: int) : int*int = {
+  proc optimised (x y z: int) : int*int = {
     if(y < z){
       x <- z + 1;
     }
@@ -274,7 +274,7 @@ or
 The while loop and the if condition executed at least once.
 In this case the variables are modified.
 
-So in order to prove that the optimization is indeed correct, we can
+So in order to prove that the optimisation is indeed correct, we can
 break our proof into these two cases, prove them independently
 and then put them back together.
 
@@ -285,9 +285,9 @@ to work with logic. Anyway, let us trudge on.
 
 Let us work with the first part in which the loops are never executed.
 *)
-lemma optimization_correct_a:
-equiv [Compiler.unoptimized ~ Compiler.optimized:
-      ={x, y ,z} /\ (z{1}=y{1} \/ z{1}<y{1}) ==> ={res}  ].
+lemma optimisation_correct_a:
+equiv [Compiler.unoptimised ~ Compiler.optimised:
+      ={x, y ,z} /\ !(y{1} < z{1}) ==> ={res}  ].
 proof.
   proc.
   simplify.
@@ -310,10 +310,9 @@ In this part of the proof, we know that the code inside the conditions
 is not executed. Hence know that
 R will simply have the variables unchanged
 *)
-  seq 0 1: ( ={x, y ,z} /\ (z{1}=y{1} \/ z{1}<y{1}) ).
+  seq 0 1: ( ={x, y ,z} /\ !(y{1} < z{1}) ).
 (* Pause and see how the goal changed and now we have two goals to prove *)
   auto.
-  smt().
 (*
 Now we know that neither of the while conditions
 hold. So like we did earlier, we will use the rcondf to work with them.
@@ -326,30 +325,13 @@ EC can target the correct side and lines of code.
 *)
   rcondf {1} 1.
   auto.
-  smt().
-(* Similarly, we work with the right program. *)
+
+  (* Similarly, we work with the right program. *)
   rcondf {2} 1.
   auto.
-  smt().
+
   auto.
 qed.
-
-(*
-Here we have used "smt()." instead of "smt."
-"smt()." simply sends only the goal (conclusion and hypothesis)
-to the external solvers.
-While "smt." tries to pick an extra set of lemmas to send as well.
-If this process of picking what to send fails, the tactic will
-send all lemmas of all the theories in the context.
-This can be quite huge, and ultimately inefficient.
-
-For smaller proofs, like ours, using either works fine, however
-in the interest of efficiency, using "smt()." is recommended.
-Often, if we know a certain lemma will be used for a proof,
-we can send the specific lemmas to the external solvers like so:
-smt(lemma_1,lemma_2,...,lemma_n).
-*)
-
 
 (*
 Now let us work with the second part of the proof which deals with
@@ -358,8 +340,8 @@ The only complex part of this proof is the while loop.
 So please pause before and after to ponder about the invariant.
 *)
 
-lemma optimization_correct_b: 
-equiv [Compiler.unoptimized ~ Compiler.optimized:
+lemma optimisation_correct_b: 
+equiv [Compiler.unoptimised ~ Compiler.optimised:
       ={x, y ,z} /\ y{1}<z{1} ==> ={res}  ].
 proof.
   proc.
@@ -378,11 +360,27 @@ hence we have x{2} = z{2} + 1 in the condition.
 qed.
 
 (*
+Here we have used "smt()." instead of "smt."
+"smt()." simply sends only the goal (conclusion and hypothesis)
+to the external solvers.
+While "smt." tries to pick an extra set of lemmas to send as well.
+If this process of picking what to send fails, the tactic will
+send all lemmas of all the theories in the context.
+This can be quite huge, and ultimately inefficient.
+
+For smaller proofs, like ours, using either works fine, however
+in the interest of efficiency, using "smt()." is recommended.
+Often, if we know a certain lemma will be used for a proof,
+we can send the specific lemmas to the external solvers like so:
+smt(lemma_1,lemma_2,...,lemma_n).
+*)
+
+(*
 Now let us put these two things together.
 *)
 
-lemma optimization_correct:
-equiv [Compiler.unoptimized ~ Compiler.optimized:
+lemma optimisation_correct:
+equiv [Compiler.unoptimised ~ Compiler.optimised:
       ={x, y ,z} ==> ={res}  ].
 proof.
   proc*.
@@ -403,21 +401,20 @@ is what we need to do since we put together two parts earlier.
 Notice how the goals changed, and how these are the exactly our
 previous two parts.
 *)
-    call optimization_correct_b. simplify. auto.
-    call optimization_correct_a. simplify. auto.
-  smt().
+    call optimisation_correct_b. simplify. auto.
+    call optimisation_correct_a. simplify. auto.
 qed.
 
 (*
 Exercises:
-The compiler optimization that we presented above
-was called "invariant hoisting". These kinds of optimizations
-are part of a larger set of optimizations that are called
-dead store optimizations. You can read more about them
+The compiler optimisation that we presented above
+was called "invariant hoisting". These kinds of optimisations
+are part of a larger set of optimisations that are called
+dead store optimisations. You can read more about them
 here.
 https://en.wikipedia.org/wiki/Dead_store
 However, as an exercise we suggest that you can try to implement
-some other compiler optimizations and prove that
+some other compiler optimisations and prove that
 they preserve program behavior.
 We provide another example here for the reader to complete.
 
@@ -430,7 +427,7 @@ Alternatively, you could use the "seq" tactic as well.
 *)
 
 module Compiler2 = {
-  proc unoptimized (x: int) : int = {
+  proc unoptimised (x: int) : int = {
     var y, z;
     y<-10;
     z <-0;
@@ -441,14 +438,14 @@ module Compiler2 = {
     return x;
   }
 
-  proc optimized (x: int) : int = {
+  proc optimised (x: int) : int = {
     x <- x + 1;
     return x;
   }
 }.
 
-lemma optimization2_correct:
-equiv [Compiler2.unoptimized ~ Compiler2.optimized:
+lemma optimisation2_correct:
+equiv [Compiler2.unoptimised ~ Compiler2.optimised:
       ={x} ==> ={res}  ].
 proof.
 admit.
@@ -465,7 +462,7 @@ executed, and another in which it is executed at least once.
 After that you could put them together.
 *)
 module Compiler3 = {
-  proc unoptimized (x y z: int) : int = {
+  proc unoptimised (x y z: int) : int = {
     while(z<y){
       z<-z+1;
     }
@@ -473,7 +470,7 @@ module Compiler3 = {
     return x;
   }
 
-  proc optimized (x: int) : int = {
+  proc optimised (x: int) : int = {
     x <- x + 1;
     return x;
   }

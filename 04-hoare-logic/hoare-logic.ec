@@ -72,9 +72,12 @@ and Q is its postcondition.
 
 Visually, skip works in the following way:
 
-     {P}     {Q}
-  ----------------- skip
        P => Q
+  ----------------- skip
+     {P}  skip;  {Q}
+
+skip; denotes an empty program.
+While skip next to the line is the tactic itself.
 *)
   skip.
 
@@ -116,11 +119,10 @@ For instance, when we have
 S2; S3 are statements that can be dealt with some axioms or logical deductions,
 then wp does the following:
 
+                       -----------------(Other rules)
+   {P} S1; {R}          {R} S2; S3; {Q}
+  --------------------------------------seq
             {P} S1; S2; S3 {Q}
-  --------------------------------------wp
-       {P} S1; {R} /\ {R} S2; S3; {Q}
-  --------------------------------------
-               {P} S1; {R}
 
 The triple {R} S2; S3; {Q} is guaranteed to hold, and
 hence the goal transforms to
@@ -134,11 +136,11 @@ In this case an assignment, and replaces the variable like we'd expect.
 When we have an empty program, we can simply use the "skip" tactic
 and continue with our proof. 
 
-             {x = 1} x:= x+2 {x=3}
-       -------------------------------wp
-              {x = 1}     {x+2=3}
+                x = 1 => x+2=3
        -------------------------------skip
-                x = 1  => x+2=3
+              {x = 1} skip; {x+2=3}
+       -------------------------------wp
+             {x = 1} x:= x+2 {x=3}
 *)
 
   wp.

@@ -216,13 +216,16 @@ So we can limit the results using a list of operators, or patterns.
 
 search ( * ).
 (*
-() - Curly braces for binary operators. 
+() - Parentheses for binary operators. 
 Notice the extra space for the "*" operator.
 We need that since (* *) also indicates comments.
 *)
 
 search (+) (=) (=>).
 (* List of operators "=>" is the implication symbol *)
+
+search min.
+(* By just the name of the operators. *)
 
 (*---- Exercises ----*)
 
@@ -250,9 +253,13 @@ proof.
     (* Both of those tactics don't work. We need something else here *)
     (* Let us see if EC has something that we can use. *)
     search (<) (+) (0) (=>).
-    apply addz_gt0.
-    (* Splits into two goals *)
-
+    rewrite addz_gt0.
+    (*
+    "rewrite" simply rewrites the pattern provided, so in our case it
+    rewrites our goal here (0 < x + 1), with the pattern that we provided
+    which is addz_gt0, and then requires us to prove the assumptions of
+    the pattern which are 0 < x and 0 < 1.
+    *)
         (* Goal 1: 0 < x *)
 
         (*
@@ -264,11 +271,6 @@ proof.
         (* Goal 2: 0 < 1 *)
         trivial.
 qed.
-
-(*
-"rewrite" simply rewrites the pattern provided,
-it can be interchanged with apply.
-*)
 
 (* Let us see some variations *)
 
@@ -328,6 +330,7 @@ serve the purpose of exercising the use of basic tactics.
 
 require import AllCore.
 
+
 (* print AllCore to see what it includes *)
 
 (* Logs and exponents: *)
@@ -348,14 +351,13 @@ proof.
     trivial.
 qed.
 
-lemma exp_product_smt (x: real) (a b: int): x <> 0%r => x^a * x^b = x^(a + b).
-smt.
-
 (* Logarithm exercises *)
 require import RealExp.
 
-print ln.
-search ln.
+(*
+Print and search for "ln" to see how it is defined and
+the results we have available already 
+*)
 lemma ln_product (x y: real) : 0%r < x  => 0%r < y => ln (x*y) = ln x + ln y.
 proof.
     search (ln) (+).
