@@ -189,8 +189,8 @@ print axiom Int.fold0.
 The keywords simply act as qualifiers and filters. You can print even without those. The qualifiers simply help us to narrow the results.
 
 The `search` command allows us to search for axioms and lemmas involving a list of operators. It accepts arguments enclosed in the following braces:
-1. `[ ]` - Square braces for unary operators
-2. `( )` - Curly braces for binary operators
+1. `[ ]` - Square brackets for unary operators
+2. `( )` - Rounded brackets for binary operators
 3. Combination of these separated by a space
 
 ```
