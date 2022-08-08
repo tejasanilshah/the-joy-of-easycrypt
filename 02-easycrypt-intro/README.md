@@ -1,3 +1,5 @@
+# Introduction to EasyCrypt
+
 As we saw earlier, the security properties of cryptosystems can be modelled as games being played by challengers (Alice, Bob) and adversaries (Eve). EasyCrypt is a proof assistant that allows us to model and verify these game-based cryptographic proofs.
 
 ## EasyCrypt environment
@@ -198,3 +200,12 @@ This is the higher-order logic that allows us to reason with the proof objects a
 With these logics, EasyCrypt allows us to verify the security properties of cryptographic protocols. Most cryptographic proofs are game-based, implying that we need the ability to work with pairs of programs, as we saw earlier in the IND-RoR example. This is essentially why we need RHL and pRHL.
 
 Apart from these logics, EasyCrypt relies on external SMT solvers to provide a fair degree of automation. SMT solvers are tools that help to determine whether a mathematical formula is satisfiable or not. We will learn to work with these logics and also how to use the external solvers in the following chapters.
+
+---
+
+**Previous**: [Preface](/01-preface)
+
+**Next**: [Ambient logic](/03-ambient-logic)
+
+---
+
