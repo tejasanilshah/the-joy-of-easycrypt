@@ -1,4 +1,4 @@
-# The least painful way to learn formal verification of cryptography
+# The Joy of EasyCrypt
 
 This repo consists of learning material for [EasyCrypt](https://github.com/EasyCrypt/easycrypt), a toolset for reasoning about cryptographic proofs. It inspired by and written in the style of [Software Foundations](https://softwarefoundations.cis.upenn.edu/), a series of electronic textbooks that explain the mathematical underpinnings of reliable software. For concepts related to cryptography we aim to track [The Joy of Cryptography](https://joyofcryptography.com/)(JoC), an open-source undergrad textbook for cryptography.
 
