@@ -1,3 +1,5 @@
+# Ambient logic
+
 The ambient logic of EasyCrypt is what drives all proof scripts. To get a grasp of how to work with ambient logic, we will work through the `ambient-logic.ec` file. As we saw in the motivating example earlier, formal proofs are a sequence of proof tactics, and so far, we've only seen the `admit` tactic. In this chapter, we will learn some more basic tactics and work with simple mathematical properties of integers.
 
 It is highly recommended to work through the file using EasyCrypt in the Proof General + Emacs environment. However, simply reading through this chapter will also provide you with a working knowledge of ambient logic and the tactics that we use in this chapter.

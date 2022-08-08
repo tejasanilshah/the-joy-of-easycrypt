@@ -192,9 +192,9 @@ EasyCrypt allows us to work with mathematical objects and results of different t
 1. **Ambient logic**:
 This is the higher-order logic that allows us to reason with the proof objects and terms.
 2. **Hoare logic and its variants**:
-    1. **Hoare Logic (HL)**: Allows us to reason about a set of instructions or a single program. This is often called classical Hoare logic.
+    1. **Hoare Logic (HL)**: Allows us to reason about a set of instructions or a single program.
     2. **Relational Hoare Logic (RHL)**: Allows us to reason about a pair of programs.
-    3. **Probabilistic Hoare Logic (pHL)**: When we have a program with elements of probabilistic behaviour, we need to modify classical Hoare Logic to work with the elements of probability. EasyCrypt supports working with these kinds of programs as well.
+    3. **Probabilistic Hoare Logic (pHL)**: When we have a program with elements of probabilistic behaviour, we need to modify Hoare Logic to work with the elements of probability. EasyCrypt supports working with these kinds of programs as well.
     4. **Probabilistic Relational Hoare Logic (pRHL)**: Similarly, pRHL allows us to reason with pairs of programs with probabilistic behaviour.
 
 With these logics, EasyCrypt allows us to verify the security properties of cryptographic protocols. Most cryptographic proofs are game-based, implying that we need the ability to work with pairs of programs, as we saw earlier in the IND-RoR example. This is essentially why we need RHL and pRHL.

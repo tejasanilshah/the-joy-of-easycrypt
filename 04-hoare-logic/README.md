@@ -1,3 +1,5 @@
+# Hoare Logic
+
 Working through the chapter on ambient logic should give you a good grasp of the ambient logic and tactics for reasoning with simple math. Up until now, we were working with mathematical proofs that only used logical reasoning. However, when working with programs and procedures we need a way to reason with what the programs do.
 
 For instance, let us think about an exponentiation program for integers like so:
