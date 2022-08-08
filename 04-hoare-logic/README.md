@@ -1,4 +1,4 @@
-Working through `ambient-logic.ec` should give you a good grasp of the ambient logic and tactics for reasoning with simple math. Up until now, we were working with mathematical proofs that only used logical reasoning. However, when working with programs and procedures we need a way to reason with what the programs do.
+Working through the chapter on ambient logic should give you a good grasp of the ambient logic and tactics for reasoning with simple math. Up until now, we were working with mathematical proofs that only used logical reasoning. However, when working with programs and procedures we need a way to reason with what the programs do.
 
 For instance, let us think about an exponentiation program for integers like so:
 
@@ -78,6 +78,8 @@ Now, we will take a look at some of the axioms of Hoare logic  with examples to 
     $$ \vdash \\{P[E/V ]\\} \ V :=E \\\{P\\} $$
 
     Where $V$ is any variable, $E$ is any expression, $P$ is any statement, and the notation $P[E/V]$ denotes the result of substituting the term $E$ for all occurrences of the variable $V$ in the statement $P$.
+    
+    Example: $\vdash \\{y = 5\\} \, x := 5 \,\\{y = x\\}$
 
 2. **Precondition strengthening**: When we have a Hoare triple $\\{P'\\}\ C \ \\{Q\\}$, where $P'$ is a statement that follows from a stronger statement, $P$. Then we can say,
 
@@ -134,7 +136,7 @@ Now, we will take a look at some of the axioms of Hoare logic  with examples to 
 
 We go through these examples to get a sense of what formal proof trees look like and the theory that formal verification is based on. The proof trees that we've used are already simplified to exclude the assignment axiom and steps that we as humans can easily understand and gloss over. Proof trees get quite large and unwieldy as soon as we do anything non-trivial. This is exactly where formal verification tools come into the picture. So, let us now switch to EasyCrypt and work with Hoare triples.
 
-Note that Hoare logic by itself is often referred to as classical Hoare logic. It has been studied quite extensively, and there are plenty of good textbooks ([Textbook 1](https://dl.acm.org/doi/10.5555/975331), [Texbook 2](https://mitpress.mit.edu/books/foundations-programming-languages)) that one can refer to for mathematical rigour and completeness. The objective here is to give the reader an intuitive understanding of the math, and enough working knowledge required to work with EasyCrypt.
+Hoare logc has been studied quite extensively, and there are plenty of good textbooks ([Textbook 1](https://dl.acm.org/doi/10.5555/975331), [Texbook 2](https://mitpress.mit.edu/books/foundations-programming-languages)) that one can refer to for mathematical rigour and completeness. The objective here is to give the reader an intuitive understanding of the math, and enough working knowledge required to work with EasyCrypt.
 
 # HL in EasyCrypt
 With a basic understanding of HL, we can now proceed to work with it in EasyCrypt. We will work through the file `hoare-logic.ec`. As before, it is recommended to work with the file in the Proof General + Emacs environment. However, reading through this section provides the basic ideas developed in the practice file.
@@ -169,7 +171,9 @@ We need to start stepping through the procedure or program that is being reasone
 
 To make progress here, we first need to tell EasyCrypt what `Func1.add_1` is. The way to do that is by using the `proc` tactic. It simply fills in the definitions of the procedures that we define. Since `Func1.add_1` is made up of only a return statement, `proc` replaces `res` with the return value. This leaves us with an empty program. This is what we want to work towards; using different tactics we would like to change the preconditions and postconditions depending on what the programs that we are reasoning with do. Once we have consumed all the program statements, we can transform the goal from a HL goal to a goal in ambient logic using the `skip` tactic. `skip` does the following:
 
-$$ \dfrac{\\{P\\} \ \ \ \ \ \\{Q\\}}{ P \implies Q} \texttt{skip} $$
+$$\dfrac{ P \implies Q}{\\{P\\} \text{ skip; } \\{Q\\}}\texttt{skip}$$
+
+$$\text{skip; signifies an empty program, while \texttt{skip} is the tactic itself}$$ 
 
 This puts us back in the familiar territory of ambient logic, and we can use all the tactics that we learnt in `ambient-logic.ec`. The only difference is that transitioning a goal from Hoare logic to ambient logic introduces some qualifiers about the memory that the program works on. Hence, we need to handle those as well. In this example, the goal after evaluating `skip` will simply read: `forall &hr, x{hr} = 1 => x{hr} + 1 = 2`. The proof for which follows pretty trivially. The only difference is that we need to move the memory into the assumption by prepending the \& character in the `move => ` tactic.
 
@@ -208,12 +212,13 @@ When we are faced with $\\{P\\} S1; S2; S3; \\{Q\\}$ with the usual definitions,
 
 For instance, when we have $\\{P\\} S1; S2; S3; \\{Q\\}$ and $S2; S3;$ are statements that can be dealt with some axioms or logical deductions, then `wp` does the following:
 
-$$ \dfrac{ \dfrac{ \\{P\\} S1; S2; S3; \\{Q\\}}    {\\{P\\} S1; \\{R\\} /\textbackslash \\{R\\} S2; S3; \\{Q\\}}\texttt{wp} } {\\{P\\} S1; \\{R\\}} $$
+$$ \dfrac{\\{P\\} S1; \\{R\\} \ \ \dfrac{...}{\\{R\\} S2; S3; \\{Q\\}}\text{\tiny{(Other rules)}}}{\\{P\\} S1; S2; S3; \\{Q\\}}\texttt{seq}$$
 
-The triple $\\{R\\} S2; S3; \\{Q\\}$ is guaranteed to hold, and hence the goal transforms to just $\\{P\\} S1; \\{R\\}$.
-In our context, we use `wp`, and `skip` to get the following proof tree:
+The judgement $\\{R\\} S2; S3; \\{Q\\}$ is guaranteed to hold, and hence the goal transforms to just $\\{P\\} S1; \\{R\\}$.
 
-$$ \dfrac{\dfrac{\\{x = 1\\} \ \  x:= x+2 \ \ \\{x=3\\}}{\\{x = 1\\}  \ \ \ \ \ \  \\{x+2=3\\}}wp } {x = 1  \implies x+2=3}skip$$
+In our context, `wp` consumes the only instruction that we have in the program and produces the judgement $\\{x = 1\\} \ \text{skip;} \ \\{x+2=3\\}$ to which we apply `skip`. This gives us the following proof-tree:
+
+$$\dfrac{x = 1  \implies x+2=3}{    \dfrac{    \\{x = 1\\} \ \text{skip;} \ \\{x+2=3\\}    }{    \\{x = 1\\} \ x:= x+2 \ \\{x=3\\}    }\texttt{wp}}\texttt{skip}$$
 
 Putting us back in familiar territory, and the proof follows quite easily.
 ```
@@ -233,7 +238,7 @@ We will be working with the following procedures in this section.
 ```
 module Func2 = {
   proc x_sq (x:int) : int = { return x*x; }
-  proc x_0  (x:int) : int = { x <- x*x; x<- x-x; return x; }
+  proc x_0  (x:int) : int = { x <- x*x; x <- x-x; return x; }
   proc x_15 (x:int) : int = { x <- 15; return x; }
 }.
 ```
@@ -506,4 +511,11 @@ qed.
 
 With that we conclude this chapter on Hoare logic. In this chapter we first presented the theory of Hoare logic, and we saw how to work with HL in EasyCrypt. Starting with simple Hoare triples we worked our way up to reasoning with more advanced Hoare triples, and along the way we learnt some new tactics that allowed us to work with the HL goals.
 
+---
+
+**Previous**: [Ambient logic](/03-ambient-logic)
+
+**Next**: [Relational Hoare Logic](/05-relational-hoare-logic)
+
+---
 
