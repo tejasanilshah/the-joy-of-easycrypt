@@ -13,7 +13,7 @@ EasyCrypt is written in OCaml and uses many external tools and libraries. Howeve
 
     These provers can take care of a lot of the low-level and often gruelling work of proving some mathematical results, as we will see.
 
-*Note*: Since there are a lot of external dependencies setting up the environment can be quite time-consuming. The best instructions for setting up EasyCrypt aren't on the official repository but can be found on [Alley Stoughton's website](https://alleystoughton.us/easycrypt-installation.html). We also provide [a screen recording]() in which we go through the instructions step-by-step and also troubleshoot some of the problems that can arise. We omit these instructions here since these can change. There are also plans to simplify the installation process with a portable application for EasyCrypt. However, until these plans materialize, we have to rely on the current method of installation.
+*Note*: Since there are a lot of external dependencies setting up the environment can be quite time-consuming. The best instructions for setting up EasyCrypt aren't on the official repository but can be found on [Alley Stoughton's website](https://alleystoughton.us/easycrypt-installation.html). We also provide [a screen recording](https://youtu.be/woGE3-5jG7I) in which we go through the instructions step-by-step and also troubleshoot some of the problems that can arise. We omit these instructions here since these can change. There are also plans to simplify the installation process with a portable application for EasyCrypt. However, until these plans materialize, we have to rely on the current method of installation.
 
 Now without delving too much into the theory, let us start with a quick motivating example.
 
