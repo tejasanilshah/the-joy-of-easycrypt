@@ -20,7 +20,7 @@ $$\dfrac{\vdash \\{P\\}\  C_1 \ \\{Q'\\}, \ \vdash \\{Q'\\}\  C_2 \ \\{Q\\},}{\v
 
 In RHL, we modify it to work with quadruples like so:
 
-$$\dfrac{\vdash \\{P\\}\  C_1 \sim D_1 \ \\{Q'\\}, \ \vdash \\{Q'\\}\  C_2 sim D_2 \ \\{Q\\},}{\vdash \\{P\\}\  C_1;C_2 \\sim D_1;D_2 \ \\{Q\\}}$$
+$$\dfrac{\vdash \\{P\\}\  C_1 \sim D_1 \ \\{Q'\\}, \ \vdash \\{Q'\\}\  C_2 \sim D_2 \ \\{Q\\},}{\vdash \\{P\\}\  C_1;C_2 \sim D_1;D_2 \ \\{Q\\}}$$
 
 This is a recurring theme when it comes to discussing Hoare logic and its variations. Each variation addresses a deficiency that the previous version has, and we update or add axioms to work with the modifications that we introduced. We will rely on EasyCrypt to take care of the details.
 
@@ -155,7 +155,7 @@ qed.
 The key takeaway of this detour is that when we work with cryptographic proofs, we will be dealing with both concrete and abstract adversaries. We can now go back to working with some more challenging Hoare quadruples.
 
 ### Advanced Hoare quadruples
-As we discussed earlier, one of the use cases of RHL is to ensure that compiler optimisations preserve program behaviour. Let us take a look at an example of this with a simple compiler optimisation called \textit{invariant hoisting}. Take a look at the programs defined below.
+As we discussed earlier, one of the use cases of RHL is to ensure that compiler optimisations preserve program behaviour. Let us take a look at an example of this with a simple compiler optimisation called *invariant hoisting*. Take a look at the programs defined below.
 ```
 module Compiler = {
   proc unoptimised (x y z: int) : int*int = {
@@ -179,18 +179,14 @@ module Compiler = {
 As you can observe, if the condition of the `while` loop in `unoptimised` holds for even one iteration the `x` is set to `z+1`. However, the subsequent iterations of the loop don't change `x`. Hence to save on computation, the compiler hoists that line out of the scope of the `while` loop, giving us `optimised`.
 
 Now let us try to prove the fact that the behaviour of both the programs is equivalent. At this point, there can be two possibilities:
-1. `!(y < z)`:
-
-  In this case, neither the `while` loop nor the `if` condition is satisfied. So, both the programs effectively do nothing to the variables.
-2. `(y < z)}`:
-
-  The `while` loop and the `if` condition are executed at least once. In this case, the variables are modified.
+1. `!(y < z)`: In this case, neither the `while` loop nor the `if` condition is satisfied. So, both the programs effectively do nothing to the variables.
+2. `(y < z)}`: The `while` loop and the `if` condition are executed at least once. In this case, the variables are modified.
 
 So to prove that the optimisation is correct, we can break our proof into these two cases, work on them independently and then put them back together.
 
 Let us work with the first part in which the loops are never executed. In this proof, we will use the `seq` tactic. It does the following:
 
-$$\dfrac{\\{P\\{ A1; \sim B1; B2; \\{R\\{ \  \  \\{R\\{ A2; A3; \sim B3; \\{Q\\{}{\\{P\\{ A1; A2; A3 \sim B1; B2; B3 \\{Q\\{}\  seq \  1 \  2:(R)$$
+$$\dfrac{\\{P\\} A1; \sim B1; B2; \\{R\\} \  \  \\{R\\} A2; A3; \sim B3; \\{Q\\}}{\\{P\\} A1; A2; A3 \sim B1; B2; B3 \\{Q\\}}\  seq \  1 \  2:(R)$$
 
 The idea behind using the `seq` is to break the programs into manageable chunks and deal with them separately. In our program, we have an `if` condition in `optimised` that we can deal with and then work with the `while` conditions. In this part of the proof, we know that the code inside the conditions is not executed. Hence, we know that we can pass the precondition itself as $R$. With this we can knock off the `if` from `optimised` using `seq`. Then we use `rcondf` to deal with the `while` loops since we know that they won't be executed.
 
