@@ -244,3 +244,11 @@ qed.
 The key takeaway is that we will rely on external solvers to do a fair amount of heavy lifting when it comes to results related to low-level math.
 
 That concludes this chapter on ambient logic. In this chapter we covered the basic tactics like `apply`, `simplify`, `move`, `rewrite` etc, we also saw how to use the `search` and `print` commands and learnt to work with external solvers. We have also provided exercises that help the reader practice using these tactics. We will introduce more tactics and other techniques as we progress in the subsequent chapters.
+
+---
+
+**Previous**: [Introduction to EasyCrypt](/02-easycrypt-intro)
+
+**Next**: [Hoare Logic](/04-hoare-logic)
+
+---
