@@ -85,8 +85,8 @@ module Game(C:Challenger, Adv:Adversary) = {
       } else {
         (* Set m to be a random string. *)
       }
-      c <- C.encrypt(m);
-      b_adv <- Adv.guess(c);
+      c <@ C.encrypt(m);
+      b_adv <@ Adv.guess(c);
       return (b_adv=b);
   }
 }.

@@ -148,7 +148,7 @@ which expects an Adv as input, and has a procedure
 module Abstract_game(A:Adv) = {
   proc one(): bool = {
       var x;
-      x <- A.eavesdrop_one();
+      x <@ A.eavesdrop_one();
       return x;
   }
 }.
@@ -199,8 +199,8 @@ module A : Adv = {
 }.
 
 module Games = {
-  proc t(): bool = { var x; x <- A.eavesdrop_one(); return x; }
-  proc f(): bool = { var x; x <- A.eavesdrop_two(); return x; }
+  proc t(): bool = { var x; x <@ A.eavesdrop_one(); return x; }
+  proc f(): bool = { var x; x <@ A.eavesdrop_two(); return x; }
 }.
 
 lemma games_quadruple (A<:Adv):
