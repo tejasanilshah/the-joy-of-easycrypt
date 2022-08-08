@@ -17,4 +17,4 @@ If you can make this project better even better, fork it and make it better.
 
 We provide the [PDF file](https://github.com/tejasanilshah/the-joy-of-easycrypt/blob/master/assets/Shah_CS_2022.pdf) which has syntax highlighting and has been proofread a couple of times as well. We recommend using that file + `.ec` files as the primary mode of consumption.
 
-Additionally, we also provide the $\LaTeX$ [project](https://github.com/tejasanilshah/the-joy-of-easycrypt/blob/master/assets/Shah_CS_2022.zip) as is and a (read-only overleaf project)[https://www.overleaf.com/read/brvftqdzgxnp] for those interested in the content and who want to use the syntax highlighting.
+Additionally, we also provide the $\LaTeX$ [project](https://github.com/tejasanilshah/the-joy-of-easycrypt/blob/master/assets/Shah_CS_2022.zip) as is and a [read-only overleaf project](https://www.overleaf.com/read/brvftqdzgxnp) for those interested in the content and who want to use the syntax highlighting.
