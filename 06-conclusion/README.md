@@ -15,4 +15,6 @@ Working through the material should give you a basic grasp of how EasyCrypt work
 This repo has been created on a best effort basis, and as outlined above needed a lot of manual effort. Meaning it could contain errors here and there. If you find any errors feel free to send a pull request with fixes.
 If you can make this project better even better, fork it and make it better.
 
-We also provide the [PDF file]() which has syntax highlighting and has been proofread a couple of times as well. We recommend using that file + `.ec` files as the primary mode of consumption.
+We provide the [PDF file](/assets/Shah_CS_2022.PDF) which has syntax highlighting and has been proofread a couple of times as well. We recommend using that file + `.ec` files as the primary mode of consumption.
+
+Additionally, we also provide the [$\LaTeX$ project](/assets/Shah_CS_2022.zip) as is for those interested in the content and who want to use the syntax highlighting.
