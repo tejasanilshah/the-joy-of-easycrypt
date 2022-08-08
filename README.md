@@ -10,6 +10,13 @@ Although Emacs is pretty complex, we only expect the reader to know how to open 
 
 As with the original text, **joy is not guaranteed**. Formal verification can be challenging, so we ask you to be patient and keep working with the material. A tip that we can provide is to start and learn as you go.
 
+
+---
+
+**Next**: [Preface](/01-preface)
+
 ---
 
 <sup>* If you do not understand what that means, it is alright, we develop the required background.</sup>
+
+
